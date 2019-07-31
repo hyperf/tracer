@@ -68,7 +68,7 @@ class Tracing implements \Zipkin\Tracing
      *
      * @return \Zipkin\Tracer
      */
-    public function getTracer()
+    public function getTracer(): Tracer
     {
         return $this->__call(__FUNCTION__, func_get_args());
     }
@@ -79,7 +79,7 @@ class Tracing implements \Zipkin\Tracing
      *
      * @return \Zipkin\Propagation\Propagation
      */
-    public function getPropagation()
+    public function getPropagation(): Propagation
     {
         return $this->__call(__FUNCTION__, func_get_args());
     }
@@ -91,7 +91,7 @@ class Tracing implements \Zipkin\Tracing
      * @return bool
      * @see Span#isNoop()
      */
-    public function isNoop()
+    public function isNoop(): bool
     {
         return $this->__call(__FUNCTION__, func_get_args());
     }
