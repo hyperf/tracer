@@ -27,20 +27,11 @@ class TraceMiddleware implements MiddlewareInterface
 {
     use SpanStarter;
 
-    /**
-     * @var SwitchManager
-     */
-    protected $switchManager;
+    private SwitchManager $switchManager;
 
-    /**
-     * @var SpanTagManager
-     */
-    protected $spanTagManager;
+    private SpanTagManager $spanTagManager;
 
-    /**
-     * @var Tracer
-     */
-    private $tracer;
+    private Tracer $tracer;
 
     public function __construct(Tracer $tracer, SwitchManager $switchManager, SpanTagManager $spanTagManager)
     {
@@ -81,7 +72,7 @@ class TraceMiddleware implements MiddlewareInterface
         return $response;
     }
 
-    protected function appendExceptionToSpan(Span $span, \Throwable $exception): void
+    private function appendExceptionToSpan(Span $span, \Throwable $exception): void
     {
         $span->setTag('error', true);
         $span->setTag($this->spanTagManager->get('exception', 'class'), get_class($exception));
@@ -90,12 +81,12 @@ class TraceMiddleware implements MiddlewareInterface
         $span->setTag($this->spanTagManager->get('exception', 'stack_trace'), (string) $exception);
     }
 
-    protected function buildSpan(ServerRequestInterface $request): Span
+    private function buildSpan(ServerRequestInterface $request): Span
     {
         $uri = $request->getUri();
-        $span = $this->startSpan('request');
+        $span = $this->startSpan($uri->getPath());
         $span->setTag($this->spanTagManager->get('coroutine', 'id'), (string) Coroutine::id());
-        $span->setTag($this->spanTagManager->get('request', 'path'), (string) $uri);
+        $span->setTag($this->spanTagManager->get('request', 'path'), $uri->getPath());
         $span->setTag($this->spanTagManager->get('request', 'method'), $request->getMethod());
         foreach ($request->getHeaders() as $key => $value) {
             $span->setTag($this->spanTagManager->get('request', 'header') . '.' . $key, implode(', ', $value));
