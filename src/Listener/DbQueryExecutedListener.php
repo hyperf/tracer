@@ -24,20 +24,11 @@ class DbQueryExecutedListener implements ListenerInterface
 {
     use SpanStarter;
 
-    /**
-     * @var Tracer
-     */
-    private $tracer;
+    private Tracer $tracer;
 
-    /**
-     * @var SwitchManager
-     */
-    private $switchManager;
+    private SwitchManager $switchManager;
 
-    /**
-     * @var SpanTagManager
-     */
-    private $spanTagManager;
+    private SpanTagManager $spanTagManager;
 
     public function __construct(Tracer $tracer, SwitchManager $switchManager, SpanTagManager $spanTagManager)
     {
@@ -48,15 +39,13 @@ class DbQueryExecutedListener implements ListenerInterface
 
     public function listen(): array
     {
-        return [
-            QueryExecuted::class,
-        ];
+        return [QueryExecuted::class];
     }
 
     /**
      * @param QueryExecuted $event
      */
-    public function process(object $event)
+    public function process(object $event): void
     {
         if ($this->switchManager->isEnable('db') === false) {
             return;
@@ -72,6 +61,10 @@ class DbQueryExecutedListener implements ListenerInterface
         $span = $this->startSpan($this->spanTagManager->get('db', 'db.query'), [
             'start_time' => (int) (($endTime - $event->time / 1000) * 1000 * 1000),
         ]);
+
+        $span->setTag('category', 'datastore');
+        $span->setTag('component', 'MySQL');
+
         $span->setTag($this->spanTagManager->get('db', 'db.statement'), $sql);
         $span->setTag($this->spanTagManager->get('db', 'db.query_time'), $event->time . ' ms');
         $span->finish((int) ($endTime * 1000 * 1000));

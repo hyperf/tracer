@@ -14,11 +14,15 @@ namespace Hyperf\Tracer\Aspect;
 use Hyperf\Di\Annotation\Aspect;
 use Hyperf\Di\Aop\AroundInterface;
 use Hyperf\Di\Aop\ProceedingJoinPoint;
+use Hyperf\Di\Exception\Exception;
 use Hyperf\Redis\Redis;
 use Hyperf\Tracer\SpanStarter;
 use Hyperf\Tracer\SpanTagManager;
 use Hyperf\Tracer\SwitchManager;
+use JsonException;
+use OpenTracing\Span;
 use OpenTracing\Tracer;
+use Throwable;
 
 /**
  * @Aspect
@@ -27,33 +31,15 @@ class RedisAspect implements AroundInterface
 {
     use SpanStarter;
 
-    /**
-     * @var array
-     */
-    public $classes
-        = [
-            Redis::class . '::__call',
-        ];
+    public array $classes = [Redis::class . '::__call'];
 
-    /**
-     * @var array
-     */
-    public $annotations = [];
+    public array $annotations = [];
 
-    /**
-     * @var Tracer
-     */
-    private $tracer;
+    private Tracer $tracer;
 
-    /**
-     * @var SwitchManager
-     */
-    private $switchManager;
+    private SwitchManager $switchManager;
 
-    /**
-     * @var SpanTagManager
-     */
-    private $spanTagManager;
+    private SpanTagManager $spanTagManager;
 
     public function __construct(Tracer $tracer, SwitchManager $switchManager, SpanTagManager $spanTagManager)
     {
@@ -63,7 +49,11 @@ class RedisAspect implements AroundInterface
     }
 
     /**
+     * @param ProceedingJoinPoint $proceedingJoinPoint
      * @return mixed return the value from process method of ProceedingJoinPoint, or the value that you handled
+     * @throws Exception
+     * @throws JsonException
+     * @throws Throwable
      */
     public function process(ProceedingJoinPoint $proceedingJoinPoint)
     {
@@ -73,17 +63,29 @@ class RedisAspect implements AroundInterface
 
         $arguments = $proceedingJoinPoint->arguments['keys'];
         $span = $this->startSpan('Redis' . '::' . $arguments['name']);
-        $span->setTag($this->spanTagManager->get('redis', 'arguments'), json_encode($arguments['arguments']));
+
+        $span->setTag('category', 'datastore');
+        $span->setTag('component', 'Redis');
+
+        $span->setTag($this->spanTagManager->get('redis', 'arguments'), json_encode($arguments['arguments'], JSON_THROW_ON_ERROR));
         try {
             $result = $proceedingJoinPoint->process();
-            $span->setTag($this->spanTagManager->get('redis', 'result'), json_encode($result));
-        } catch (\Throwable $e) {
-            $span->setTag('error', true);
-            $span->log(['message', $e->getMessage(), 'code' => $e->getCode(), 'stacktrace' => $e->getTraceAsString()]);
+            $span->setTag($this->spanTagManager->get('redis', 'result'), json_encode($result, JSON_THROW_ON_ERROR));
+        } catch (Throwable $e) {
+            $this->switchManager->isEnable('exception') && $this->appendExceptionToSpan($span, $e);
             throw $e;
         } finally {
             $span->finish();
         }
         return $result;
+    }
+
+    private function appendExceptionToSpan(Span $span, Throwable $exception): void
+    {
+        $span->setTag('error', true);
+        $span->setTag($this->spanTagManager->get('exception', 'class'), get_class($exception));
+        $span->setTag($this->spanTagManager->get('exception', 'code'), $exception->getCode());
+        $span->setTag($this->spanTagManager->get('exception', 'message'), $exception->getMessage());
+        $span->setTag($this->spanTagManager->get('exception', 'stack_trace'), (string) $exception);
     }
 }

@@ -28,7 +28,10 @@
     },
     "require-dev": {
         "hyperf/config": "^2.2",
+        "hyperf/database": "^2.2",
+        "hyperf/event": "^2.2",
         "hyperf/http-message": "^2.2",
+        "hyperf/redis": "^2.2",
         "mockery/mockery": "^1.4",
         "phpunit/phpunit": "^9.5",
         "psr/http-server-handler": "^1.0",

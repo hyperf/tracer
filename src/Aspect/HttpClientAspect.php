@@ -15,12 +15,13 @@ use GuzzleHttp\Client;
 use Hyperf\Di\Annotation\Aspect;
 use Hyperf\Di\Aop\AroundInterface;
 use Hyperf\Di\Aop\ProceedingJoinPoint;
+use Hyperf\Di\Exception\Exception;
 use Hyperf\Tracer\SpanStarter;
 use Hyperf\Tracer\SpanTagManager;
 use Hyperf\Tracer\SwitchManager;
-use Hyperf\Utils\Context;
 use OpenTracing\Tracer;
 use Psr\Http\Message\ResponseInterface;
+use Throwable;
 use const OpenTracing\Formats\TEXT_MAP;
 
 /**
@@ -30,26 +31,15 @@ class HttpClientAspect implements AroundInterface
 {
     use SpanStarter;
 
-    public $classes = [
-        Client::class . '::requestAsync',
-    ];
+    public array $classes = [Client::class . '::requestAsync'];
 
-    public $annotations = [];
+    public array $annotations = [];
 
-    /**
-     * @var Tracer
-     */
-    private $tracer;
+    private Tracer $tracer;
 
-    /**
-     * @var SwitchManager
-     */
-    private $switchManager;
+    private SwitchManager $switchManager;
 
-    /**
-     * @var SpanTagManager
-     */
-    private $spanTagManager;
+    private SpanTagManager $spanTagManager;
 
     public function __construct(Tracer $tracer, SwitchManager $switchManager, SpanTagManager $spanTagManager)
     {
@@ -59,7 +49,10 @@ class HttpClientAspect implements AroundInterface
     }
 
     /**
+     * @param ProceedingJoinPoint $proceedingJoinPoint
      * @return mixed return the value from process method of ProceedingJoinPoint, or the value that you handled
+     * @throws Exception
+     * @throws Throwable
      */
     public function process(ProceedingJoinPoint $proceedingJoinPoint)
     {
@@ -75,6 +68,10 @@ class HttpClientAspect implements AroundInterface
         $uri = $arguments['keys']['uri'] ?? 'Null';
         $key = "HTTP Request [{$method}] {$uri}";
         $span = $this->startSpan($key);
+
+        $span->setTag('category', 'http');
+        $span->setTag('component', 'GuzzleHttp');
+
         $span->setTag('source', $proceedingJoinPoint->className . '::' . $proceedingJoinPoint->methodName);
         if ($this->spanTagManager->has('http_client', 'http.url')) {
             $span->setTag($this->spanTagManager->get('http_client', 'http.url'), $uri);
@@ -97,7 +94,7 @@ class HttpClientAspect implements AroundInterface
             if ($result instanceof ResponseInterface) {
                 $span->setTag($this->spanTagManager->get('http_client', 'http.status_code'), $result->getStatusCode());
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $span->setTag('error', true);
             $span->log(['message', $e->getMessage(), 'code' => $e->getCode(), 'stacktrace' => $e->getTraceAsString()]);
             throw $e;
