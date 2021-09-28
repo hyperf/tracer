@@ -1,6 +1,6 @@
 {
     "name": "hyperf/tracer",
-    "description": "A open tracing system implemented for Hyperf or other coroutine framework",
+    "description": "An open tracing system implemented for Hyperf or other coroutine framework",
     "license": "MIT",
     "keywords": [
         "php",
@@ -22,11 +22,16 @@
         "hyperf/di": "~2.2.0",
         "hyperf/guzzle": "~2.2.0",
         "hyperf/utils": "~2.2.0",
-        "jcchavezs/zipkin-opentracing":"^1.0",
         "opentracing/opentracing":"^1.0"
+    },
+    "require-dev": {
+        "mockery/mockery": "^1.4",
+        "phpunit/phpunit": "^9.5",
+        "roave/security-advisories": "dev-latest"
     },
     "suggest": {
         "hyperf/event": "Required to use DbQueryExecutedListener.",
+        "jcchavezs/zipkin-opentracing":"Required to use zipkin tracing.",
         "jonahgeorge/jaeger-client-php":"Required (^0.6) to use jaeger tracing."
     },
     "autoload": {
