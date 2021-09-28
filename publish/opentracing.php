@@ -9,10 +9,8 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
-use Zipkin\Samplers\BinarySampler;
-
 return [
-    'default' => env('TRACER_DRIVER', 'zipkin'),
+    'default' => env('TRACER_DRIVER', 'jaeger'),
     'enable' => [
         'guzzle' => env('TRACER_ENABLE_GUZZLE', false),
         'redis' => env('TRACER_ENABLE_REDIS', false),
@@ -34,7 +32,7 @@ return [
                 'endpoint_url' => env('ZIPKIN_ENDPOINT_URL', 'http://localhost:9411/api/v2/spans'),
                 'timeout' => env('ZIPKIN_TIMEOUT', 1),
             ],
-            'sampler' => BinarySampler::createAsAlwaysSample(),
+            'sampler' => Zipkin\Samplers\BinarySampler\BinarySampler::createAsAlwaysSample(),
         ],
         'jaeger' => [
             'driver' => Hyperf\Tracer\Adapter\JaegerTracerFactory::class,
