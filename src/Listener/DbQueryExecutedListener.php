@@ -65,6 +65,7 @@ class DbQueryExecutedListener implements ListenerInterface
         $span->setTag('category', 'datastore');
         $span->setTag('component', 'MySQL');
         $span->setTag('kind', 'client');
+        $span->setTag('otel.status_code', 'OK');
 
         $span->setTag($this->spanTagManager->get('db', 'db.statement'), $sql);
         $span->setTag($this->spanTagManager->get('db', 'db.query_time'), $event->time . ' ms');

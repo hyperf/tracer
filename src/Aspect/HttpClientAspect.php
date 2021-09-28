@@ -96,7 +96,9 @@ class HttpClientAspect implements AroundInterface
             if ($result instanceof ResponseInterface) {
                 $span->setTag($this->spanTagManager->get('http_client', 'http.status_code'), $result->getStatusCode());
             }
+            $span->setTag('otel.status_code', 'OK');
         } catch (Throwable $e) {
+            $span->setTag('otel.status_code', 'ERROR');
             $this->switchManager->isEnable('exception') && $this->appendExceptionToSpan($span, $e);
             throw $e;
         } finally {
