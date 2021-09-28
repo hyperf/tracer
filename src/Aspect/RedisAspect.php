@@ -66,6 +66,7 @@ class RedisAspect implements AroundInterface
 
         $span->setTag('category', 'datastore');
         $span->setTag('component', 'Redis');
+        $span->setTag('span.kind', 'client');
 
         $span->setTag($this->spanTagManager->get('redis', 'arguments'), json_encode($arguments['arguments'], JSON_THROW_ON_ERROR));
         try {

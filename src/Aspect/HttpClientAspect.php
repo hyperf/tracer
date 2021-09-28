@@ -72,6 +72,7 @@ class HttpClientAspect implements AroundInterface
 
         $span->setTag('category', 'http');
         $span->setTag('component', 'GuzzleHttp');
+        $span->setTag('span.kind', 'client');
 
         $span->setTag('source', $proceedingJoinPoint->className . '::' . $proceedingJoinPoint->methodName);
         if ($this->spanTagManager->has('http_client', 'http.url')) {
