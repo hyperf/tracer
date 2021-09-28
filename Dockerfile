@@ -1,3 +1,3 @@
-FROM phpswoole/swoole:4.7-php8.0-alpine
+FROM hyperf/hyperf:8.0-alpine-v3.14-swoole-v4.7
 WORKDIR /usr/local/src/
 ENTRYPOINT [ "/bin/sh" ]
