@@ -9,7 +9,7 @@
 
 ### Development environment
 ```shell
-docker-compose run devenv
+docker-compose run --rm devenv
 ```
 
 ### Inside the container
