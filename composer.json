@@ -1,23 +1,22 @@
 {
     "name": "hyperf/tracer",
-    "description": "An open tracing system implemented for Hyperf or other coroutine framework",
+    "description": "An open tracing system implemented for PicPay's Hyperf microservices",
     "license": "MIT",
     "keywords": [
         "php",
         "hyperf",
         "open-tracing",
-        "zipkin"
+        "jaeger"
     ],
-    "homepage": "https://hyperf.io",
+    "homepage": "https://github.com/PicPay/hyperf-tracer",
     "support": {
-        "docs": "https://hyperf.wiki",
-        "issues": "https://github.com/hyperf/hyperf/issues",
-        "pull-request": "https://github.com/hyperf/hyperf/pulls",
-        "source": "https://github.com/hyperf/hyperf"
+        "docs": "https://github.com/PicPay/hyperf-tracer/wiki",
+        "issues": "https://github.com/PicPay/hyperf-tracer/issues",
+        "pull-request": "https://github.com/PicPay/hyperf-tracer/pulls",
+        "source": "https://github.com/PicPay/hyperf-tracer"
     },
     "require": {
-        "php": ">=7.2",
-        "psr/http-message": "^1.0",
+        "php": ">=7.4",
         "hyperf/contract": "~2.2.0",
         "hyperf/di": "~2.2.0",
         "hyperf/guzzle": "~2.2.0",
@@ -31,8 +30,7 @@
     },
     "suggest": {
         "hyperf/event": "Required to use DbQueryExecutedListener.",
-        "jcchavezs/zipkin-opentracing":"Required to use zipkin tracing.",
-        "jonahgeorge/jaeger-client-php":"Required (^0.6) to use jaeger tracing."
+        "jcchavezs/zipkin-opentracing": "Required to use zipkin tracing."
     },
     "autoload": {
         "psr-4": {
