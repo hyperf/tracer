@@ -67,6 +67,7 @@ class RedisAspect implements AroundInterface
         $span->setTag('category', 'datastore');
         $span->setTag('component', 'Redis');
         $span->setTag('kind', 'client');
+        $span->setTag('db.system', 'redis');
 
         $span->setTag($this->spanTagManager->get('redis', 'arguments'), json_encode($arguments['arguments'], JSON_THROW_ON_ERROR));
         try {
@@ -76,7 +77,7 @@ class RedisAspect implements AroundInterface
         } catch (Throwable $e) {
             $span->setTag('otel.status_code', 'ERROR');
             $span->setTag('otel.status_description', $e->getMessage());
-            
+
             $this->switchManager->isEnable('exception') && $this->appendExceptionToSpan($span, $e);
             throw $e;
         } finally {
