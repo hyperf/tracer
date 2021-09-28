@@ -1,0 +1,8 @@
+version: '3.9'
+services:
+  devenv:
+    container_name: hyperf_tracer_devenv
+    build: .
+    tty: true
+    volumes:
+      - ./:/usr/local/src/
