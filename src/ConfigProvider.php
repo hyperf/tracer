@@ -22,13 +22,13 @@ class ConfigProvider
     {
         return [
             'dependencies' => [
-                //Tracer::class => TracerFactory::class,
+                Tracer::class => TracerFactory::class,
                 SwitchManager::class => SwitchManagerFactory::class,
                 SpanTagManager::class => SpanTagManagerFactory::class,
                 Client::class => Client::class,
             ],
             'listeners' => [
-                //DbQueryExecutedListener::class,
+                DbQueryExecutedListener::class,
             ],
             'annotations' => [
                 'scan' => [

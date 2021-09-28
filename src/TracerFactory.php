@@ -12,7 +12,7 @@ declare(strict_types=1);
 namespace Hyperf\Tracer;
 
 use Hyperf\Contract\ConfigInterface;
-use Hyperf\Tracer\Adapter\ZipkinTracerFactory;
+use Hyperf\Tracer\Adapter\JaegerTracerFactory;
 use Hyperf\Tracer\Contract\NamedFactoryInterface;
 use Hyperf\Tracer\Exception\InvalidArgumentException;
 use Psr\Container\ContainerInterface;
@@ -31,7 +31,7 @@ class TracerFactory
 
         // v1.0 has no 'default' config. Fallback to v1.0 mode for backward compatibility.
         if (empty($name)) {
-            $factory = $container->get(ZipkinTracerFactory::class);
+            $factory = $container->get(JaegerTracerFactory::class);
             return $factory->make('');
         }
 

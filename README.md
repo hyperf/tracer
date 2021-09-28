@@ -19,18 +19,6 @@ composer require hyperf/tracer
 php bin/hyperf.php vendor:publish hyperf/tracer
 ```
 
-#### Bring Jaeger to the playground (downgrading `psr/cache` with `-W`)
-```shell
-composer require jonahgeorge/jaeger-client-php -W
-```
-
-#### Assign a `Tracer` factory at `config/autoload/dependencies.php`
-```php
-return [
-    \OpenTracing\Tracer::class => \Hyperf\Tracer\TracerFactory::class,
-];
-```
-
 ## Contributing
 
 ### Development environment
