@@ -36,3 +36,4 @@ composer install
 ## Footnotes
 - https://docs.newrelic.com/attribute-dictionary/?event=Span
 - https://docs.newrelic.com/docs/integrations/open-source-telemetry-integrations/opentelemetry/view-your-opentelemetry-data-new-relic/
+- https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/api.md#span
