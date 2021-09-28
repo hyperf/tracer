@@ -13,9 +13,8 @@ namespace Hyperf\Tracer\Adapter;
 
 use Hyperf\Guzzle\ClientFactory as GuzzleClientFactory;
 use RuntimeException;
-use Zipkin\Reporters\Http\ClientFactory;
 
-class HttpClientFactory implements ClientFactory
+class HttpClientFactory
 {
     /**
      * @var GuzzleClientFactory

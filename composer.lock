@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "233a1e9d026dc6583b78aff697016876",
+    "content-hash": "6c68d8c9a8cae08efcabfc03ab04e2ff",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -2062,6 +2062,71 @@
                 "source": "https://github.com/hamcrest/hamcrest-php/tree/v2.0.1"
             },
             "time": "2020-07-09T08:09:16+00:00"
+        },
+        {
+            "name": "hyperf/config",
+            "version": "v2.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hyperf/config.git",
+                "reference": "ccdcc79ec244612c04f186e65b222ad778db75e9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/hyperf/config/zipball/ccdcc79ec244612c04f186e65b222ad778db75e9",
+                "reference": "ccdcc79ec244612c04f186e65b222ad778db75e9",
+                "shasum": ""
+            },
+            "require": {
+                "hyperf/contract": "~2.2.0",
+                "hyperf/utils": "~2.2.0",
+                "php": ">=7.2",
+                "psr/container": "^1.0|^2.0",
+                "symfony/finder": "^5.0"
+            },
+            "suggest": {
+                "hyperf/di": "Allows using @Value annotation",
+                "hyperf/event": "Allows using @Value annotation",
+                "hyperf/framework": "Allows using @Value annotation",
+                "vlucas/phpdotenv": "Allows using enviroment value to override the config"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.2-dev"
+                },
+                "hyperf": {
+                    "config": "Hyperf\\Config\\ConfigProvider"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "./src/Functions.php"
+                ],
+                "psr-4": {
+                    "Hyperf\\Config\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "An independent component that provides configuration container.",
+            "homepage": "https://hyperf.io",
+            "keywords": [
+                "config",
+                "configuration",
+                "hyperf",
+                "php",
+                "swoole"
+            ],
+            "support": {
+                "docs": "https://hyperf.wiki",
+                "issues": "https://github.com/hyperf/hyperf/issues",
+                "pull-request": "https://github.com/hyperf/hyperf/pulls",
+                "source": "https://github.com/hyperf/hyperf"
+            },
+            "time": "2021-07-18T06:50:14+00:00"
         },
         {
             "name": "mockery/mockery",

@@ -17,7 +17,6 @@ use Hyperf\Tracer\TracerFactory;
 use Hyperf\Utils\ApplicationContext;
 use Mockery;
 use PHPUnit\Framework\TestCase;
-use Zipkin\Samplers\BinarySampler;
 
 /**
  * @internal
@@ -25,74 +24,9 @@ use Zipkin\Samplers\BinarySampler;
  */
 class TracerFactoryTest extends TestCase
 {
-    protected function tearDown(): void
-    {
-        Mockery::close();
-    }
+    use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 
-    public function testOldSetting()
-    {
-        $config = new Config([
-            'opentracing' => [
-                'zipkin' => [
-                    'app' => [
-                        'name' => env('APP_NAME', 'skeleton'),
-                        // Hyperf will detect the system info automatically as the value if ipv4, ipv6, port is null
-                        'ipv4' => '127.0.0.1',
-                        'ipv6' => null,
-                        'port' => 9501,
-                    ],
-                    'options' => [
-                        'endpoint_url' => env('ZIPKIN_ENDPOINT_URL', 'http://localhost:9411/api/v2/spans'),
-                        'timeout' => env('ZIPKIN_TIMEOUT', 1),
-                    ],
-                    'sampler' => BinarySampler::createAsAlwaysSample(),
-                ],
-            ],
-        ]);
-        $container = $this->getContainer($config);
-        $factory = new TracerFactory();
-
-        $this->assertInstanceOf(\ZipkinOpenTracing\Tracer::class, $factory($container));
-    }
-
-    public function testZipkinFactory()
-    {
-        $config = new Config([
-            'opentracing' => [
-                'default' => 'zipkin',
-                'enable' => [
-                ],
-                'tracer' => [
-                    'zipkin' => [
-                        'driver' => \Hyperf\Tracer\Adapter\ZipkinTracerFactory::class,
-                        'app' => [
-                            'name' => 'skeleton',
-                            // Hyperf will detect the system info automatically as the value if ipv4, ipv6, port is null
-                            'ipv4' => '127.0.0.1',
-                            'ipv6' => null,
-                            'port' => 9501,
-                        ],
-                        'options' => [
-                        ],
-                        'sampler' => BinarySampler::createAsAlwaysSample(),
-                    ],
-                    'jaeger' => [
-                        'driver' => \Hyperf\Tracer\Adapter\JaegerTracerFactory::class,
-                        'name' => 'skeleton',
-                        'options' => [
-                        ],
-                    ],
-                ],
-            ],
-        ]);
-        $container = $this->getContainer($config);
-        $factory = new TracerFactory();
-
-        $this->assertInstanceOf(\ZipkinOpenTracing\Tracer::class, $factory($container));
-    }
-
-    public function testJaegerFactory()
+    public function testJaegerFactory(): void
     {
         $config = new Config([
             'opentracing' => [
@@ -111,7 +45,6 @@ class TracerFactoryTest extends TestCase
                         ],
                         'options' => [
                         ],
-                        'sampler' => BinarySampler::createAsAlwaysSample(),
                     ],
                     'jaeger' => [
                         'driver' => \Hyperf\Tracer\Adapter\JaegerTracerFactory::class,
