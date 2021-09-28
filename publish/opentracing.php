@@ -12,44 +12,26 @@ declare(strict_types=1);
 return [
     'default' => env('TRACER_DRIVER', 'jaeger'),
     'enable' => [
-        'guzzle' => env('TRACER_ENABLE_GUZZLE', false),
-        'redis' => env('TRACER_ENABLE_REDIS', false),
-        'db' => env('TRACER_ENABLE_DB', false),
-        'method' => env('TRACER_ENABLE_METHOD', false),
-        'exception' => env('TRACER_ENABLE_EXCEPTION', false),
+        'guzzle' => env('TRACER_ENABLE_GUZZLE', true),
+        'redis' => env('TRACER_ENABLE_REDIS', true),
+        'db' => env('TRACER_ENABLE_DB', true),
+        'method' => env('TRACER_ENABLE_METHOD', false), // Experimental
+        'exception' => env('TRACER_ENABLE_EXCEPTION', true),
     ],
     'tracer' => [
-        'zipkin' => [
-            'driver' => Hyperf\Tracer\Adapter\ZipkinTracerFactory::class,
-            'app' => [
-                'name' => env('APP_NAME', 'skeleton'),
-                // Hyperf will detect the system info automatically as the value if ipv4, ipv6, port is null
-                'ipv4' => '127.0.0.1',
-                'ipv6' => null,
-                'port' => 9501,
-            ],
-            'options' => [
-                'endpoint_url' => env('ZIPKIN_ENDPOINT_URL', 'http://localhost:9411/api/v2/spans'),
-                'timeout' => env('ZIPKIN_TIMEOUT', 1),
-            ],
-        ],
         'jaeger' => [
             'driver' => Hyperf\Tracer\Adapter\JaegerTracerFactory::class,
             'name' => env('APP_NAME', 'skeleton'),
             'options' => [
-                /*
-                 * You can uncomment the sampler lines to use custom strategy.
-                 *
-                 * For more available configurations,
-                 * @see https://github.com/jonahgeorge/jaeger-client-php
-                 */
-                // 'sampler' => [
-                //     'type' => \Jaeger\SAMPLER_TYPE_CONST,
-                //     'param' => true,
-                // ],,
+                'sampler' => [
+                    'type' => Jaeger\SAMPLER_TYPE_CONST,
+                    'param' => true,
+                ],
+                'logging' => true,
+                'dispatch_mode' => Jaeger\Config::JAEGER_OVER_BINARY_UDP,
                 'local_agent' => [
                     'reporting_host' => env('JAEGER_REPORTING_HOST', 'localhost'),
-                    'reporting_port' => env('JAEGER_REPORTING_PORT', 5775),
+                    'reporting_port' => env('JAEGER_REPORTING_PORT', 6832),
                 ],
             ],
         ],
