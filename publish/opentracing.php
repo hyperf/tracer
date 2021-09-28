@@ -32,7 +32,6 @@ return [
                 'endpoint_url' => env('ZIPKIN_ENDPOINT_URL', 'http://localhost:9411/api/v2/spans'),
                 'timeout' => env('ZIPKIN_TIMEOUT', 1),
             ],
-            'sampler' => Zipkin\Samplers\BinarySampler\BinarySampler::createAsAlwaysSample(),
         ],
         'jaeger' => [
             'driver' => Hyperf\Tracer\Adapter\JaegerTracerFactory::class,
