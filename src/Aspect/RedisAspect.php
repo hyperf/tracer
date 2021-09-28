@@ -75,6 +75,8 @@ class RedisAspect implements AroundInterface
             $span->setTag('otel.status_code', 'OK');
         } catch (Throwable $e) {
             $span->setTag('otel.status_code', 'ERROR');
+            $span->setTag('otel.status_description', $e->getMessage());
+            
             $this->switchManager->isEnable('exception') && $this->appendExceptionToSpan($span, $e);
             throw $e;
         } finally {

@@ -62,6 +62,8 @@ class TraceMiddleware implements MiddlewareInterface
             $span->setTag('otel.status_code', 'OK');
         } catch (\Throwable $exception) {
             $span->setTag('otel.status_code', 'ERROR');
+            $span->setTag('otel.status_description', $exception->getMessage());
+            
             $this->switchManager->isEnable('exception') && $this->appendExceptionToSpan($span, $exception);
             if ($exception instanceof HttpException) {
                 $span->setTag($this->spanTagManager->get('response', 'status_code'), $exception->getStatusCode());
