@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 /**
- * This file is part of Hyperf.
+ * This file is part of Hyperf + PicPay.
  *
- * @link     https://www.hyperf.io
- * @document https://hyperf.wiki
- * @contact  group@hyperf.io
- * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ * @link     https://github.com/PicPay/hyperf-tracer
+ * @document https://github.com/PicPay/hyperf-tracer/wiki
+ * @contact  @PicPay
+ * @license  https://github.com/PicPay/hyperf-tracer/blob/main/LICENSE
  */
 namespace Hyperf\Tracer\Middleware;
 
@@ -63,7 +63,7 @@ class TraceMiddleware implements MiddlewareInterface
         } catch (\Throwable $exception) {
             $span->setTag('otel.status_code', 'ERROR');
             $span->setTag('otel.status_description', $exception->getMessage());
-            
+
             $this->switchManager->isEnable('exception') && $this->appendExceptionToSpan($span, $exception);
             if ($exception instanceof HttpException) {
                 $span->setTag($this->spanTagManager->get('response', 'status_code'), $exception->getStatusCode());

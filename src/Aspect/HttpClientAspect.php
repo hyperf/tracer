@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 /**
- * This file is part of Hyperf.
+ * This file is part of Hyperf + PicPay.
  *
- * @link     https://www.hyperf.io
- * @document https://hyperf.wiki
- * @contact  group@hyperf.io
- * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ * @link     https://github.com/PicPay/hyperf-tracer
+ * @document https://github.com/PicPay/hyperf-tracer/wiki
+ * @contact  @PicPay
+ * @license  https://github.com/PicPay/hyperf-tracer/blob/main/LICENSE
  */
 namespace Hyperf\Tracer\Aspect;
 
@@ -50,10 +50,9 @@ class HttpClientAspect implements AroundInterface
     }
 
     /**
-     * @param ProceedingJoinPoint $proceedingJoinPoint
-     * @return mixed return the value from process method of ProceedingJoinPoint, or the value that you handled
      * @throws Exception
      * @throws Throwable
+     * @return mixed return the value from process method of ProceedingJoinPoint, or the value that you handled
      */
     public function process(ProceedingJoinPoint $proceedingJoinPoint)
     {
@@ -100,7 +99,7 @@ class HttpClientAspect implements AroundInterface
         } catch (Throwable $e) {
             $span->setTag('otel.status_code', 'ERROR');
             $span->setTag('otel.status_description', $e->getMessage());
-            
+
             $this->switchManager->isEnable('exception') && $this->appendExceptionToSpan($span, $e);
             throw $e;
         } finally {
