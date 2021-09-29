@@ -14,34 +14,38 @@ namespace Hyperf\Tracer\Aspect;
 use Hyperf\Di\Annotation\Aspect;
 use Hyperf\Di\Aop\AroundInterface;
 use Hyperf\Di\Aop\ProceedingJoinPoint;
+use Hyperf\Di\Exception\Exception;
 use Hyperf\Tracer\Annotation\Trace;
+use Hyperf\Tracer\ExceptionAppender;
 use Hyperf\Tracer\SpanStarter;
+use Hyperf\Tracer\SwitchManager;
 use OpenTracing\Tracer;
+use Throwable;
 
-/**
- * @Aspect
- */
+/** @Aspect */
 class TraceAnnotationAspect implements AroundInterface
 {
     use SpanStarter;
+    use ExceptionAppender;
 
-    public $classes = [];
+    public array $classes = [];
 
-    public $annotations = [
-        Trace::class,
-    ];
+    public array $annotations = [Trace::class];
 
-    /**
-     * @var Tracer
-     */
-    private $tracer;
+    private Tracer $tracer;
 
-    public function __construct(Tracer $tracer)
+    private SwitchManager $switchManager;
+
+    public function __construct(Tracer $tracer, SwitchManager $switchManager)
     {
+        /* @noinspection UnusedConstructorDependenciesInspection */
         $this->tracer = $tracer;
+        $this->switchManager = $switchManager;
     }
 
     /**
+     * @throws Exception
+     * @throws Throwable
      * @return mixed return the value from process method of ProceedingJoinPoint, or the value that you handled
      */
     public function process(ProceedingJoinPoint $proceedingJoinPoint)
@@ -60,10 +64,10 @@ class TraceAnnotationAspect implements AroundInterface
         $span->setTag($tag, $source);
         try {
             $result = $proceedingJoinPoint->process();
-        } catch (\Throwable $e) {
-            $span->setTag('error', true);
-            $span->log(['message', $e->getMessage(), 'code' => $e->getCode(), 'stacktrace' => $e->getTraceAsString()]);
-            throw $e;
+            $span->setTag('otel.status_code', 'OK');
+        } catch (Throwable $exception) {
+            $this->switchManager->isEnabled('exception') && $this->appendExceptionToSpan($span, $exception);
+            throw $exception;
         } finally {
             $span->finish();
         }

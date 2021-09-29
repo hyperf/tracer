@@ -11,6 +11,7 @@ declare(strict_types=1);
  */
 namespace Hyperf\Tracer\Adapter;
 
+use Exception;
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Tracer\Contract\NamedFactoryInterface;
 use Jaeger\Config;
@@ -21,25 +22,13 @@ use const Jaeger\SAMPLER_TYPE_CONST;
 
 class JaegerTracerFactory implements NamedFactoryInterface
 {
-    /**
-     * @var ConfigInterface
-     */
-    private $config;
+    private ConfigInterface $config;
 
-    /**
-     * @var null|LoggerInterface
-     */
-    private $logger;
+    private ?LoggerInterface $logger;
 
-    /**
-     * @var null|CacheItemPoolInterface
-     */
-    private $cache;
+    private ?CacheItemPoolInterface $cache;
 
-    /**
-     * @var string
-     */
-    private $prefix;
+    private string $prefix;
 
     public function __construct(ConfigInterface $config, ?LoggerInterface $logger = null, ?CacheItemPoolInterface $cache = null)
     {
@@ -48,6 +37,9 @@ class JaegerTracerFactory implements NamedFactoryInterface
         $this->cache = $cache;
     }
 
+    /**
+     * @throws Exception
+     */
     public function make(string $name): Tracer
     {
         $this->prefix = "opentracing.tracer.{$name}.";

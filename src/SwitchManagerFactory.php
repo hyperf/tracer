@@ -16,7 +16,7 @@ use Psr\Container\ContainerInterface;
 
 class SwitchManagerFactory
 {
-    public function __invoke(ContainerInterface $container)
+    public function __invoke(ContainerInterface $container): SwitchManager
     {
         $config = $container->get(ConfigInterface::class);
         $manager = new SwitchManager();

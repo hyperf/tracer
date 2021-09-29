@@ -11,10 +11,12 @@ declare(strict_types=1);
  */
 namespace Hyperf\Tracer\Contract;
 
+use OpenTracing\Tracer;
+
 interface NamedFactoryInterface
 {
     /**
      * Create the object from factory.
      */
-    public function make(string $name): \OpenTracing\Tracer;
+    public function make(string $name): Tracer;
 }

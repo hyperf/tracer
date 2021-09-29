@@ -17,55 +17,31 @@ use Hyperf\Utils\ApplicationContext;
 use Hyperf\Utils\Coordinator\Constants;
 use Hyperf\Utils\Coordinator\CoordinatorManager;
 use Hyperf\Utils\Coroutine;
-use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
 use Thrift\Exception\TTransportException;
 use Thrift\Transport\TTransport;
+use Throwable;
 
 class ThriftUdpTransport extends TTransport
 {
-    /**
-     * @var string
-     */
-    private $host;
+    private string $host;
 
-    /**
-     * @var int
-     */
-    private $port;
+    private int $port;
 
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
-     * @var ?resource
-     */
+    /** @var ?resource */
     private $socket;
 
-    /**
-     * @var ?Channel
-     */
-    private $chan;
+    private Channel $chan;
 
-    /**
-     * ThriftUdpTransport constructor.
-     * @param LoggerInterface $logger
-     */
-    public function __construct(string $host, int $port, LoggerInterface $logger = null)
+    public function __construct(string $host, int $port)
     {
         $this->host = $host;
         $this->port = $port;
-        $this->logger = $logger ?? new NullLogger();
     }
 
     /**
      * Whether this transport is open.
-     *
-     * @return bool true if open
      */
-    public function isOpen()
+    public function isOpen(): bool
     {
         return $this->socket !== null;
     }
@@ -73,16 +49,16 @@ class ThriftUdpTransport extends TTransport
     /**
      * Open the transport for reading/writing.
      *
-     * @throws TTransportException if cannot open
+     * @throws TTransportException if it cannot open
      */
-    public function open()
+    public function open(): void
     {
         if (! Coroutine::inCoroutine()) {
             $this->doOpen();
             return;
         }
 
-        if (! $this->chan) {
+        if (! isset($this->chan)) {
             $this->loop();
             return;
         }
@@ -95,7 +71,7 @@ class ThriftUdpTransport extends TTransport
     /**
      * Close the transport.
      */
-    public function close()
+    public function close(): void
     {
         if (! Coroutine::inCoroutine()) {
             @socket_close($this->socket);
@@ -103,7 +79,7 @@ class ThriftUdpTransport extends TTransport
             return;
         }
 
-        if (! $this->chan) {
+        if (! isset($this->chan)) {
             $this->loop();
         }
 
@@ -114,14 +90,10 @@ class ThriftUdpTransport extends TTransport
     }
 
     /**
-     * Read some data into the array.
-     *
-     * @todo
-     *
-     * @param int $len How much to read
-     * @return string The data that has been read
+     * @TODO Read some data into the array.
+     * @param int $len
      */
-    public function read($len)
+    public function read($len): string
     {
         return '';
     }
@@ -132,13 +104,13 @@ class ThriftUdpTransport extends TTransport
      * @param string $buf The data to write
      * @throws TTransportException if writing fails
      */
-    public function write($buf)
+    public function write($buf): void
     {
         if (! Coroutine::inCoroutine()) {
             $this->doWrite($buf);
         }
 
-        if (! $this->chan) {
+        if (! isset($this->chan)) {
             $this->loop();
         }
 
@@ -147,6 +119,9 @@ class ThriftUdpTransport extends TTransport
         });
     }
 
+    /**
+     * @throws TTransportException
+     */
     private function doOpen(): void
     {
         $this->socket = @socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
@@ -156,6 +131,9 @@ class ThriftUdpTransport extends TTransport
         }
     }
 
+    /**
+     * @throws TTransportException
+     */
     private function doWrite(string $buf): void
     {
         if (! $this->isOpen()) {
@@ -181,13 +159,11 @@ class ThriftUdpTransport extends TTransport
                             break 2;
                         }
                         $closure->call($this);
-                    } catch (\Throwable $e) {
-                        if (ApplicationContext::hasContainer()) {
-                            if (ApplicationContext::getContainer()->has(StdoutLoggerInterface::class)) {
-                                ApplicationContext::getContainer()
-                                    ->get(StdoutLoggerInterface::class)
-                                    ->error('ThriftUdpTransport error:' . $e->getMessage());
-                            }
+                    } catch (Throwable $e) {
+                        if (ApplicationContext::hasContainer() && ApplicationContext::getContainer()->has(StdoutLoggerInterface::class)) {
+                            ApplicationContext::getContainer()
+                                ->get(StdoutLoggerInterface::class)
+                                ->error('ThriftUdpTransport error:' . $e->getMessage());
                         }
                         @socket_close($this->socket);
                         $this->socket = null;
@@ -202,7 +178,7 @@ class ThriftUdpTransport extends TTransport
             $once = true;
             Coroutine::create(function () {
                 CoordinatorManager::until(Constants::WORKER_EXIT)->yield();
-                if ($this->chan) {
+                if (isset($this->chan)) {
                     $this->chan->close();
                 }
             });

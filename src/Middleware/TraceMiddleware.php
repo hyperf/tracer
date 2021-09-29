@@ -1,4 +1,8 @@
 <?php
+/**
+ * @noinspection UnknownInspectionInspection
+ * @noinspection PhpUnused
+ */
 
 declare(strict_types=1);
 /**
@@ -11,10 +15,14 @@ declare(strict_types=1);
  */
 namespace Hyperf\Tracer\Middleware;
 
+use Hyperf\Contract\ApplicationInterface;
+use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\HttpMessage\Exception\HttpException;
+use Hyperf\Tracer\ExceptionAppender;
 use Hyperf\Tracer\SpanStarter;
 use Hyperf\Tracer\SpanTagManager;
 use Hyperf\Tracer\SwitchManager;
+use Hyperf\Utils\ApplicationContext;
 use Hyperf\Utils\Coroutine;
 use OpenTracing\Span;
 use OpenTracing\Tracer;
@@ -22,10 +30,12 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Throwable;
 
 class TraceMiddleware implements MiddlewareInterface
 {
     use SpanStarter;
+    use ExceptionAppender;
 
     private SwitchManager $switchManager;
 
@@ -45,6 +55,7 @@ class TraceMiddleware implements MiddlewareInterface
      * Processes an incoming server request in order to produce a response.
      * If unable to produce the response itself, it may delegate to the provided
      * request handler to do so.
+     * @throws Throwable
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
@@ -53,18 +64,20 @@ class TraceMiddleware implements MiddlewareInterface
         defer(function () {
             try {
                 $this->tracer->flush();
-            } catch (\Throwable $exception) {
+            } catch (Throwable $exception) {
+                if (ApplicationContext::hasContainer() && ApplicationContext::getContainer()->has(StdoutLoggerInterface::class)) {
+                    ApplicationContext::getContainer()
+                        ->get(StdoutLoggerInterface::class)
+                        ->error($exception->getMessage());
+                }
             }
         });
         try {
             $response = $handler->handle($request);
             $span->setTag($this->spanTagManager->get('response', 'status_code'), $response->getStatusCode());
             $span->setTag('otel.status_code', 'OK');
-        } catch (\Throwable $exception) {
-            $span->setTag('otel.status_code', 'ERROR');
-            $span->setTag('otel.status_description', $exception->getMessage());
-
-            $this->switchManager->isEnable('exception') && $this->appendExceptionToSpan($span, $exception);
+        } catch (Throwable $exception) {
+            $this->switchManager->isEnabled('exception') && $this->appendExceptionToSpan($span, $exception);
             if ($exception instanceof HttpException) {
                 $span->setTag($this->spanTagManager->get('response', 'status_code'), $exception->getStatusCode());
             }
@@ -74,15 +87,6 @@ class TraceMiddleware implements MiddlewareInterface
         }
 
         return $response;
-    }
-
-    private function appendExceptionToSpan(Span $span, \Throwable $exception): void
-    {
-        $span->setTag('error', true);
-        $span->setTag($this->spanTagManager->get('exception', 'class'), get_class($exception));
-        $span->setTag($this->spanTagManager->get('exception', 'code'), $exception->getCode());
-        $span->setTag($this->spanTagManager->get('exception', 'message'), $exception->getMessage());
-        $span->setTag($this->spanTagManager->get('exception', 'stack_trace'), (string) $exception);
     }
 
     private function buildSpan(ServerRequestInterface $request): Span

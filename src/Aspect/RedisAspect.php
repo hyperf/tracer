@@ -16,20 +16,19 @@ use Hyperf\Di\Aop\AroundInterface;
 use Hyperf\Di\Aop\ProceedingJoinPoint;
 use Hyperf\Di\Exception\Exception;
 use Hyperf\Redis\Redis;
+use Hyperf\Tracer\ExceptionAppender;
 use Hyperf\Tracer\SpanStarter;
 use Hyperf\Tracer\SpanTagManager;
 use Hyperf\Tracer\SwitchManager;
 use JsonException;
-use OpenTracing\Span;
 use OpenTracing\Tracer;
 use Throwable;
 
-/**
- * @Aspect
- */
+/** @Aspect */
 class RedisAspect implements AroundInterface
 {
     use SpanStarter;
+    use ExceptionAppender;
 
     public array $classes = [Redis::class . '::__call'];
 
@@ -43,6 +42,7 @@ class RedisAspect implements AroundInterface
 
     public function __construct(Tracer $tracer, SwitchManager $switchManager, SpanTagManager $spanTagManager)
     {
+        /* @noinspection UnusedConstructorDependenciesInspection */
         $this->tracer = $tracer;
         $this->switchManager = $switchManager;
         $this->spanTagManager = $spanTagManager;
@@ -56,7 +56,7 @@ class RedisAspect implements AroundInterface
      */
     public function process(ProceedingJoinPoint $proceedingJoinPoint)
     {
-        if ($this->switchManager->isEnable('redis') === false) {
+        if ($this->switchManager->isEnabled('redis') === false) {
             return $proceedingJoinPoint->process();
         }
 
@@ -73,24 +73,12 @@ class RedisAspect implements AroundInterface
             $result = $proceedingJoinPoint->process();
             $span->setTag($this->spanTagManager->get('redis', 'result'), json_encode($result, JSON_THROW_ON_ERROR));
             $span->setTag('otel.status_code', 'OK');
-        } catch (Throwable $e) {
-            $span->setTag('otel.status_code', 'ERROR');
-            $span->setTag('otel.status_description', $e->getMessage());
-
-            $this->switchManager->isEnable('exception') && $this->appendExceptionToSpan($span, $e);
-            throw $e;
+        } catch (Throwable $exception) {
+            $this->switchManager->isEnabled('exception') && $this->appendExceptionToSpan($span, $exception);
+            throw $exception;
         } finally {
             $span->finish();
         }
         return $result;
-    }
-
-    private function appendExceptionToSpan(Span $span, Throwable $exception): void
-    {
-        $span->setTag('error', true);
-        $span->setTag($this->spanTagManager->get('exception', 'class'), get_class($exception));
-        $span->setTag($this->spanTagManager->get('exception', 'code'), $exception->getCode());
-        $span->setTag($this->spanTagManager->get('exception', 'message'), $exception->getMessage());
-        $span->setTag($this->spanTagManager->get('exception', 'stack_trace'), (string) $exception);
     }
 }

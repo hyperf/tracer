@@ -16,17 +16,13 @@ use OpenTracing\Span;
 
 class SwitchManager
 {
-    /**
-     * @var array
-     */
-    private $config
+    private array $config
         = [
-            'guzzle' => false,
-            'redis' => false,
-            'db' => false,
-            // beta feature, please donot enable 'method' in production environment
-            'method' => false,
-            'error' => false,
+            'guzzle' => true,
+            'redis' => true,
+            'db' => true,
+            'method' => false, // experimental
+            'exception' => true,
         ];
 
     /**
@@ -38,9 +34,9 @@ class SwitchManager
     }
 
     /**
-     * Determire if the tracer is enable ?
+     * Determine if the tracer is enabled.
      */
-    public function isEnable(string $identifier): bool
+    public function isEnabled(string $identifier): bool
     {
         if (! isset($this->config[$identifier])) {
             return false;

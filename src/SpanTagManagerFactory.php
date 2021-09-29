@@ -16,7 +16,7 @@ use Psr\Container\ContainerInterface;
 
 class SpanTagManagerFactory
 {
-    public function __invoke(ContainerInterface $container)
+    public function __invoke(ContainerInterface $container): SpanTagManager
     {
         $config = $container->get(ConfigInterface::class);
         $spanTag = new SpanTagManager();

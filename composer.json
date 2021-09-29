@@ -18,6 +18,7 @@
     "require": {
         "php": ">=7.4",
         "ext-json": "*",
+        "ext-sockets": "*",
         "hyperf/contract": "~2.2.0",
         "hyperf/di": "~2.2.0",
         "hyperf/guzzle": "~2.2.0",
@@ -37,11 +38,11 @@
         "phpunit/phpunit": "^9.5",
         "psr/http-server-handler": "^1.0",
         "psr/http-server-middleware": "^1.0",
-        "roave/security-advisories": "dev-latest"
+        "roave/security-advisories": "dev-latest",
+        "swoole/ide-helper": "^4.7"
     },
     "suggest": {
-        "hyperf/event": "Required to use DbQueryExecutedListener.",
-        "jcchavezs/zipkin-opentracing": "Required to use zipkin tracing."
+        "hyperf/event": "Required to use DbQueryExecutedListener."
     },
     "autoload": {
         "psr-4": {
@@ -50,6 +51,7 @@
     },
     "autoload-dev": {
         "psr-4": {
+            "HyperfTest\\Tracer\\": "tests/"
         }
     },
     "config": {

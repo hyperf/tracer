@@ -16,21 +16,21 @@ use Hyperf\Di\Annotation\Aspect;
 use Hyperf\Di\Aop\AroundInterface;
 use Hyperf\Di\Aop\ProceedingJoinPoint;
 use Hyperf\Di\Exception\Exception;
+use Hyperf\Tracer\ExceptionAppender;
 use Hyperf\Tracer\SpanStarter;
 use Hyperf\Tracer\SpanTagManager;
 use Hyperf\Tracer\SwitchManager;
-use OpenTracing\Span;
 use OpenTracing\Tracer;
 use Psr\Http\Message\ResponseInterface;
 use Throwable;
 use const OpenTracing\Formats\TEXT_MAP;
 
-/**
- * @Aspect
- */
+/** @Aspect */
 class HttpClientAspect implements AroundInterface
 {
     use SpanStarter;
+    
+    use ExceptionAppender;
 
     public array $classes = [Client::class . '::requestAsync'];
 
@@ -56,7 +56,7 @@ class HttpClientAspect implements AroundInterface
      */
     public function process(ProceedingJoinPoint $proceedingJoinPoint)
     {
-        if ($this->switchManager->isEnable('guzzle') === false) {
+        if ($this->switchManager->isEnabled('guzzle') === false) {
             return $proceedingJoinPoint->process();
         }
         $options = $proceedingJoinPoint->arguments['keys']['options'];
@@ -96,24 +96,12 @@ class HttpClientAspect implements AroundInterface
                 $span->setTag($this->spanTagManager->get('http_client', 'http.status_code'), $result->getStatusCode());
             }
             $span->setTag('otel.status_code', 'OK');
-        } catch (Throwable $e) {
-            $span->setTag('otel.status_code', 'ERROR');
-            $span->setTag('otel.status_description', $e->getMessage());
-
-            $this->switchManager->isEnable('exception') && $this->appendExceptionToSpan($span, $e);
-            throw $e;
+        } catch (Throwable $exception) {
+            $this->switchManager->isEnabled('exception') && $this->appendExceptionToSpan($span, $exception);
+            throw $exception;
         } finally {
             $span->finish();
         }
         return $result;
-    }
-
-    private function appendExceptionToSpan(Span $span, Throwable $exception): void
-    {
-        $span->setTag('error', true);
-        $span->setTag($this->spanTagManager->get('exception', 'class'), get_class($exception));
-        $span->setTag($this->spanTagManager->get('exception', 'code'), $exception->getCode());
-        $span->setTag($this->spanTagManager->get('exception', 'message'), $exception->getMessage());
-        $span->setTag($this->spanTagManager->get('exception', 'stack_trace'), (string) $exception);
     }
 }

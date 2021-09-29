@@ -13,13 +13,11 @@ namespace Hyperf\Tracer\Adapter;
 
 use Hyperf\Guzzle\ClientFactory as GuzzleClientFactory;
 use RuntimeException;
+use function strlen;
 
 class HttpClientFactory
 {
-    /**
-     * @var GuzzleClientFactory
-     */
-    private $guzzleClientFactory;
+    private GuzzleClientFactory $guzzleClientFactory;
 
     public function __construct(GuzzleClientFactory $guzzleClientFactory)
     {
@@ -32,7 +30,7 @@ class HttpClientFactory
             $url = $options['endpoint_url'];
             unset($options['endpoint_url']);
             $client = $this->guzzleClientFactory->create($options);
-            $additionalHeaders = (isset($options['headers']) ? $options['headers'] : []);
+            $additionalHeaders = $options['headers'] ?? [];
             $requiredHeaders = [
                 'Content-Type' => 'application/json',
                 'Content-Length' => strlen($payload),

@@ -32,6 +32,7 @@ class DbQueryExecutedListener implements ListenerInterface
 
     public function __construct(Tracer $tracer, SwitchManager $switchManager, SpanTagManager $spanTagManager)
     {
+        /* @noinspection UnusedConstructorDependenciesInspection */
         $this->tracer = $tracer;
         $this->switchManager = $switchManager;
         $this->spanTagManager = $spanTagManager;
@@ -42,14 +43,16 @@ class DbQueryExecutedListener implements ListenerInterface
         return [QueryExecuted::class];
     }
 
-    /**
-     * @param QueryExecuted $event
-     */
     public function process(object $event): void
     {
-        if ($this->switchManager->isEnable('db') === false) {
+        if ($this->switchManager->isEnabled('db') === false) {
             return;
         }
+
+        if (! ($event instanceof QueryExecuted)) {
+            return;
+        }
+
         $sql = $event->sql;
         if (! Arr::isAssoc($event->bindings)) {
             foreach ($event->bindings as $key => $value) {

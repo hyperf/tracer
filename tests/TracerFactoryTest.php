@@ -11,11 +11,16 @@ declare(strict_types=1);
  */
 namespace HyperfTest\Tracer;
 
+use Exception;
 use Hyperf\Config\Config;
+use Hyperf\Contract\ConfigInterface;
 use Hyperf\Di\Container;
+use Hyperf\Tracer\Adapter\JaegerTracerFactory;
 use Hyperf\Tracer\TracerFactory;
 use Hyperf\Utils\ApplicationContext;
+use Jaeger\Tracer;
 use Mockery;
+use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -24,8 +29,11 @@ use PHPUnit\Framework\TestCase;
  */
 class TracerFactoryTest extends TestCase
 {
-    use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
+    use MockeryPHPUnitIntegration;
 
+    /**
+     * @throws Exception
+     */
     public function testJaegerFactory(): void
     {
         $config = new Config([
@@ -34,20 +42,8 @@ class TracerFactoryTest extends TestCase
                 'enable' => [
                 ],
                 'tracer' => [
-                    'zipkin' => [
-                        'driver' => \Hyperf\Tracer\Adapter\ZipkinTracerFactory::class,
-                        'app' => [
-                            'name' => 'skeleton',
-                            // Hyperf will detect the system info automatically as the value if ipv4, ipv6, port is null
-                            'ipv4' => '127.0.0.1',
-                            'ipv6' => null,
-                            'port' => 9501,
-                        ],
-                        'options' => [
-                        ],
-                    ],
                     'jaeger' => [
-                        'driver' => \Hyperf\Tracer\Adapter\JaegerTracerFactory::class,
+                        'driver' => JaegerTracerFactory::class,
                         'name' => 'skeleton',
                         'options' => [
                         ],
@@ -58,23 +54,20 @@ class TracerFactoryTest extends TestCase
         $container = $this->getContainer($config);
         $factory = new TracerFactory();
 
-        $this->assertInstanceOf(\Jaeger\Tracer::class, $factory($container));
+        $this->assertInstanceOf(Tracer::class, $factory($container));
     }
 
     protected function getContainer($config)
     {
         $container = Mockery::mock(Container::class);
-        $client = Mockery::mock(\Hyperf\Tracer\Adapter\HttpClientFactory::class);
 
-        $container->shouldReceive('get')
-            ->with(\Hyperf\Tracer\Adapter\ZipkinTracerFactory::class)
-            ->andReturn(new \Hyperf\Tracer\Adapter\ZipkinTracerFactory($config, $client));
-        $container->shouldReceive('get')
-            ->with(\Hyperf\Tracer\Adapter\JaegerTracerFactory::class)
-            ->andReturn(new \Hyperf\Tracer\Adapter\JaegerTracerFactory($config));
-        $container->shouldReceive('get')
-            ->with(\Hyperf\Contract\ConfigInterface::class)
-            ->andReturn($config);
+        $container->allows('get')
+            ->with(JaegerTracerFactory::class)
+            ->andReturns(new JaegerTracerFactory($config));
+        
+        $container->allows('get')
+            ->with(ConfigInterface::class)
+            ->andReturns($config);
 
         ApplicationContext::setContainer($container);
 
