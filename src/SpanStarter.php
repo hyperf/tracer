@@ -11,7 +11,11 @@ declare(strict_types=1);
  */
 namespace Hyperf\Tracer;
 
+use Hyperf\Contract\StdoutLoggerInterface;
+use Hyperf\Engine\Exception\CoroutineDestroyedException;
+use Hyperf\Utils\ApplicationContext;
 use Hyperf\Utils\Context;
+use Hyperf\Utils\Coroutine;
 use OpenTracing\Span;
 use Psr\Http\Message\ServerRequestInterface;
 use const OpenTracing\Formats\TEXT_MAP;
@@ -28,7 +32,7 @@ trait SpanStarter
         array $option = [],
         string $kind = SPAN_KIND_RPC_SERVER
     ): Span {
-        $root = Context::get('tracer.root');
+        $root = $this->getTracerRoot(Coroutine::id());
         if (! $root instanceof Span) {
             /** @var ServerRequestInterface $request */
             $request = Context::get(ServerRequestInterface::class);
@@ -58,5 +62,32 @@ trait SpanStarter
         $child = $this->tracer->startSpan($name, $option);
         $child->setTag(SPAN_KIND, $kind);
         return $child;
+    }
+
+    private function getTracerRoot(int $coroutineId): ?Span
+    {
+        /** @var null|Span $root */
+        $root = Context::get('tracer.root', null, $coroutineId);
+
+        if ($root instanceof Span) {
+            return $root;
+        }
+
+        if ($coroutineId <= 1) {
+            return $root;
+        }
+
+        try {
+            $parent_id = Coroutine::parentId($coroutineId);
+        } catch (CoroutineDestroyedException $exception) {
+            if (ApplicationContext::hasContainer() && ApplicationContext::getContainer()->has(StdoutLoggerInterface::class)) {
+                ApplicationContext::getContainer()
+                    ->get(StdoutLoggerInterface::class)
+                    ->warning($exception->getMessage());
+            }
+            return null;
+        }
+
+        return $this->getTracerRoot($parent_id);
     }
 }
