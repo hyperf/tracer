@@ -61,7 +61,7 @@ class DbQueryExecutedListener implements ListenerInterface
         }
 
         $endTime = microtime(true);
-        $span = $this->startSpan($this->spanTagManager->get('db', 'db.query'), [
+        $span = $this->startSpan($event->sql, [
             'start_time' => (int) (($endTime - $event->time / 1000) * 1000 * 1000),
         ]);
 
