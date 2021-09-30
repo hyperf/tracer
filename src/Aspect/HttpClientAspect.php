@@ -69,14 +69,14 @@ class HttpClientAspect implements AroundInterface
         /** @var Uri $base_uri */
         $base_uri = $instance->getConfig('base_uri');
         $arguments = $proceedingJoinPoint->arguments;
-        $method = strtoupper($arguments['keys']['method'] ?? 'Null');
-        $uri = $arguments['keys']['uri'] ?? 'Null';
+        $method = strtoupper($arguments['keys']['method'] ?? '');
+        $uri = $arguments['keys']['uri'] ?? '';
         $span = $this->startSpan(
             sprintf(
                 '%s %s/%s',
                 $method,
                 rtrim((string) $base_uri, '/'),
-                ltrim(parse_url($uri, PHP_URL_PATH), '/')
+                ltrim(parse_url($uri, PHP_URL_PATH) ?? '', '/')
             )
         );
 
