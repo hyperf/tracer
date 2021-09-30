@@ -13,6 +13,7 @@ namespace Hyperf\Tracer\Aspect;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Psr7\Uri;
 use Hyperf\Di\Annotation\Aspect;
 use Hyperf\Di\Aop\AroundInterface;
 use Hyperf\Di\Aop\ProceedingJoinPoint;
@@ -63,20 +64,31 @@ class HttpClientAspect implements AroundInterface
         if (isset($options['no_aspect']) && $options['no_aspect'] === true) {
             return $proceedingJoinPoint->process();
         }
+        /** @var Client $instance */
+        $instance = $proceedingJoinPoint->getInstance();
+        /** @var Uri $base_uri */
+        $base_uri = $instance->getConfig('base_uri');
         $arguments = $proceedingJoinPoint->arguments;
         $method = strtoupper($arguments['keys']['method'] ?? 'Null');
         $uri = $arguments['keys']['uri'] ?? 'Null';
-        $path = parse_url($uri, PHP_URL_PATH);
-        $key = "{$method} /{$path}";
-        $span = $this->startSpan($key);
+        $span = $this->startSpan(
+            sprintf(
+                '%s %s/%s',
+                $method,
+                rtrim((string) $base_uri, '/'),
+                ltrim(parse_url($uri, PHP_URL_PATH), '/')
+            )
+        );
 
         $span->setTag('category', 'http');
         $span->setTag('component', 'GuzzleHttp');
         $span->setTag('kind', 'client');
-
         $span->setTag('source', $proceedingJoinPoint->className . '::' . $proceedingJoinPoint->methodName);
         if ($this->spanTagManager->has('http_client', 'http.url')) {
             $span->setTag($this->spanTagManager->get('http_client', 'http.url'), $uri);
+        }
+        if ($this->spanTagManager->has('http_client', 'http.host')) {
+            $span->setTag($this->spanTagManager->get('http_client', 'http.host'), $base_uri->getHost());
         }
         if ($this->spanTagManager->has('http_client', 'http.method')) {
             $span->setTag($this->spanTagManager->get('http_client', 'http.method'), $method);

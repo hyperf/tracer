@@ -15,11 +15,14 @@ class SpanTagManager
 {
     private const DEFAULTS = [
         'http_client' => [
-            'http.status_code' => 'status',
+            'http.url' => 'http.url',
+            'http.host' => 'http.host',
+            'http.method' => 'http.method',
+            'http.status_code' => 'http.status_code',
         ],
         'redis' => [
-            'arguments' => 'arguments',
-            'result' => 'result',
+            'arguments' => 'db.arguments',
+            'result' => 'db.result',
         ],
         'db' => [
             'db.query' => 'db.query',

@@ -39,6 +39,7 @@ return [
     'tags' => [
         'http_client' => [
             'http.url' => 'http.url',
+            'http.host' => 'http.host',
             'http.method' => 'http.method',
             'http.status_code' => 'http.status_code',
         ],
