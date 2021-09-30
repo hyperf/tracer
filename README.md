@@ -21,6 +21,17 @@ Drop-in replacement of `hyperf/tracer` suited for PicPay's microservices needs.
     php bin/hyperf.php vendor:publish hyperf/tracer
     ```
 
+### Enabling features
+
+- HTTP Middleware (`config/autoload/middlewares.php`)
+  ```php
+  return [
+    'http' => [
+        Hyperf\Tracer\Middleware\TraceMiddleware::class
+    ],
+  ];
+  ```
+
 ## Contributing
 
 ### Development environment
