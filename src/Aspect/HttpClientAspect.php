@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace Hyperf\Tracer\Aspect;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\BadResponseException;
 use Hyperf\Di\Annotation\Aspect;
 use Hyperf\Di\Aop\AroundInterface;
 use Hyperf\Di\Aop\ProceedingJoinPoint;
@@ -29,7 +30,6 @@ use const OpenTracing\Formats\TEXT_MAP;
 class HttpClientAspect implements AroundInterface
 {
     use SpanStarter;
-    
     use ExceptionAppender;
 
     public array $classes = [Client::class . '::requestAsync'];
@@ -98,6 +98,9 @@ class HttpClientAspect implements AroundInterface
             $span->setTag('otel.status_code', 'OK');
         } catch (Throwable $exception) {
             $this->switchManager->isEnabled('exception') && $this->appendExceptionToSpan($span, $exception);
+            if ($exception instanceof BadResponseException) {
+                $span->setTag($this->spanTagManager->get('http_client', 'http.status_code'), $exception->getResponse()->getStatusCode());
+            }
             throw $exception;
         } finally {
             $span->finish();
