@@ -64,9 +64,10 @@ class HttpClientAspect implements AroundInterface
             return $proceedingJoinPoint->process();
         }
         $arguments = $proceedingJoinPoint->arguments;
-        $method = $arguments['keys']['method'] ?? 'Null';
+        $method = strtoupper($arguments['keys']['method'] ?? 'Null');
         $uri = $arguments['keys']['uri'] ?? 'Null';
-        $key = "HTTP Request [{$method}] {$uri}";
+        $path = parse_url($uri, PHP_URL_PATH);
+        $key = "{$method} /{$path}";
         $span = $this->startSpan($key);
 
         $span->setTag('category', 'http');
