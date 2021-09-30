@@ -11,19 +11,17 @@ declare(strict_types=1);
  */
 namespace Hyperf\Tracer;
 
-use Hyperf\Utils\Context;
-use OpenTracing\Span;
-
 class SwitchManager
 {
-    private array $config
-        = [
-            'guzzle' => true,
-            'redis' => true,
-            'db' => true,
-            'method' => false, // experimental
-            'exception' => true,
-        ];
+    private const DEFAULTS = [
+        'guzzle' => true,
+        'redis' => true,
+        'db' => true,
+        'method' => false, // experimental
+        'exception' => true,
+    ];
+
+    private array $config = self::DEFAULTS;
 
     /**
      * Apply the configuration to SwitchManager.
@@ -38,10 +36,6 @@ class SwitchManager
      */
     public function isEnabled(string $identifier): bool
     {
-        if (! isset($this->config[$identifier])) {
-            return false;
-        }
-
-        return $this->config[$identifier] && Context::get('tracer.root') instanceof Span;
+        return $this->config[$identifier] ?? false;
     }
 }

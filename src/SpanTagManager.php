@@ -13,7 +13,7 @@ namespace Hyperf\Tracer;
 
 class SpanTagManager
 {
-    private const DEFAULT_TAGS = [
+    private const DEFAULTS = [
         'http_client' => [
             'http.status_code' => 'status',
         ],
@@ -49,11 +49,11 @@ class SpanTagManager
         ],
     ];
 
-    private array $tags = [];
+    private array $tags = self::DEFAULTS;
 
     public function apply(array $tags): void
     {
-        $this->tags = array_replace_recursive(self::DEFAULT_TAGS, $tags);
+        $this->tags = array_replace_recursive($this->tags, $tags);
     }
 
     public function get(string $type, string $name): string
