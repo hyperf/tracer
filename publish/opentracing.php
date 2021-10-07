@@ -35,6 +35,9 @@ return [
                 ],
             ],
         ],
+        'noop' => [
+            'driver' => Hyperf\Tracer\Adapter\NoopTracerFactory::class,
+        ],
     ],
     'tags' => [
         'http_client' => [

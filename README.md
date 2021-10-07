@@ -32,6 +32,15 @@ Drop-in replacement of `hyperf/tracer` suited for PicPay's microservices needs.
   ];
   ```
 
+## Caveats
+
+### Testing
+"Disable" tracing when testing. At `test/bootstrap.php` add:
+```php
+putenv('TRACER_DRIVER=noop');
+```
+**Anywhere before `$container = require BASE_PATH . '/config/container.php';`** 
+
 ## Contributing
 
 ### Development environment
