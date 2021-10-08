@@ -71,11 +71,12 @@ class HttpClientAspect implements AroundInterface
         $arguments = $proceedingJoinPoint->arguments;
         $method = strtoupper($arguments['keys']['method'] ?? '');
         $uri = $arguments['keys']['uri'] ?? '';
+        $host = $base_uri === null ? (parse_url($uri, PHP_URL_HOST) ?? '') : $base_uri->getHost();
         $span = $this->startSpan(
             sprintf(
                 '%s %s/%s',
                 $method,
-                rtrim((string) $base_uri, '/'),
+                rtrim((string) ($base_uri ?? ''), '/'),
                 ltrim(parse_url($uri, PHP_URL_PATH) ?? '', '/')
             )
         );
@@ -88,7 +89,7 @@ class HttpClientAspect implements AroundInterface
             $span->setTag($this->spanTagManager->get('http_client', 'http.url'), $uri);
         }
         if ($this->spanTagManager->has('http_client', 'http.host')) {
-            $span->setTag($this->spanTagManager->get('http_client', 'http.host'), $base_uri->getHost());
+            $span->setTag($this->spanTagManager->get('http_client', 'http.host'), $host);
         }
         if ($this->spanTagManager->has('http_client', 'http.method')) {
             $span->setTag($this->spanTagManager->get('http_client', 'http.method'), $method);
