@@ -12,7 +12,9 @@ declare(strict_types=1);
 namespace Hyperf\Tracer\Aspect;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Promise\Create;
+use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\Psr7\Uri;
 use Hyperf\Di\Annotation\Aspect;
 use Hyperf\Di\Aop\AroundInterface;
@@ -22,6 +24,7 @@ use Hyperf\Tracer\ExceptionAppender;
 use Hyperf\Tracer\SpanStarter;
 use Hyperf\Tracer\SpanTagManager;
 use Hyperf\Tracer\SwitchManager;
+use OpenTracing\Span;
 use OpenTracing\Tracer;
 use Psr\Http\Message\ResponseInterface;
 use Throwable;
@@ -104,21 +107,41 @@ class HttpClientAspect implements AroundInterface
         $options['headers'] = array_replace($options['headers'] ?? [], $appendHeaders);
         $proceedingJoinPoint->arguments['keys']['options'] = $options;
 
-        try {
-            $result = $proceedingJoinPoint->process();
-            if ($result instanceof ResponseInterface) {
-                $span->setTag($this->spanTagManager->get('http_client', 'http.status_code'), $result->getStatusCode());
-            }
-            $span->setTag('otel.status_code', 'OK');
-        } catch (Throwable $exception) {
-            $this->switchManager->isEnabled('exception') && $this->appendExceptionToSpan($span, $exception);
-            if ($exception instanceof BadResponseException) {
-                $span->setTag($this->spanTagManager->get('http_client', 'http.status_code'), $exception->getResponse()->getStatusCode());
-            }
-            throw $exception;
-        } finally {
-            $span->finish();
-        }
+        /** @var PromiseInterface $result */
+        $result = $proceedingJoinPoint->process();
+        $result->then(
+            $this->onFullFilled($span),
+            $this->onRejected($span)
+        );
+        $span->finish();
+
         return $result;
+    }
+
+    private function onFullFilled(Span $span): callable
+    {
+        return function (ResponseInterface $response) use ($span) {
+            $span->setTag(
+                $this->spanTagManager->get('http_client', 'http.status_code'),
+                $response->getStatusCode()
+            );
+            $span->setTag('otel.status_code', 'OK');
+        };
+    }
+
+    private function onRejected(Span $span): callable
+    {
+        return function (RequestException $exception) use ($span) {
+            if ($this->switchManager->isEnabled('exception')) {
+                $this->appendExceptionToSpan($span, $exception);
+            }
+
+            $span->setTag(
+                $this->spanTagManager->get('http_client', 'http.status_code'),
+                $exception->getResponse()->getStatusCode()
+            );
+
+            return Create::rejectionFor($exception);
+        };
     }
 }
