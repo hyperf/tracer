@@ -53,6 +53,7 @@ class TraceMiddleware implements MiddlewareInterface
         try {
             $response = $handler->handle($request);
         } finally {
+            $span->setTag('response', $response->getBody()->getContents());
             $span->finish();
         }
 
@@ -61,13 +62,23 @@ class TraceMiddleware implements MiddlewareInterface
 
     protected function buildSpan(ServerRequestInterface $request): Span
     {
-        $uri = $request->getUri();
-        $span = $this->startSpan('request');
+        $uri    = $request->getUri();
+        $method = $request->getMethod();
+        $host   = $uri->getHost();
+        $path   = $uri->getPath();
+        $name   = $host.$path;
+        $span   = $this->startSpan($name);
         $span->setTag('coroutine.id', (string) Coroutine::id());
         $span->setTag('request.path', (string) $uri);
         $span->setTag('request.method', $request->getMethod());
         foreach ($request->getHeaders() as $key => $value) {
             $span->setTag('request.header.' . $key, implode(', ', $value));
+            if ($method=='POST'){
+                $span->setTag('parms', json_encode($request->getParsedBody(),JSON_UNESCAPED_UNICODE));
+            }
+            if ($method=='GET'){
+                $span->setTag('parms', json_encode($request->getQueryParams(),JSON_UNESCAPED_UNICODE));
+            }
         }
         return $span;
     }
