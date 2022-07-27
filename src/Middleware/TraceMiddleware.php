@@ -28,6 +28,7 @@ use OpenTracing\Span;
 use OpenTracing\Tracer;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\UriInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Throwable;
@@ -89,19 +90,25 @@ class TraceMiddleware implements MiddlewareInterface
         return $response;
     }
 
-    private function buildSpan(ServerRequestInterface $request): Span
+    protected function buildSpan(ServerRequestInterface $request): Span
     {
-        $uri = $request->getUri();
-        $span = $this->startSpan($uri->getPath());
+        $path = $this->getPath($request->getUri());
+
+        $span = $this->startSpan($path);
 
         $span->setTag('kind', 'server');
 
         $span->setTag($this->spanTagManager->get('coroutine', 'id'), (string) Coroutine::id());
-        $span->setTag($this->spanTagManager->get('request', 'path'), $uri->getPath());
+        $span->setTag($this->spanTagManager->get('request', 'path'), $path);
         $span->setTag($this->spanTagManager->get('request', 'method'), $request->getMethod());
         foreach ($request->getHeaders() as $key => $value) {
             $span->setTag($this->spanTagManager->get('request', 'header') . '.' . $key, implode(', ', $value));
         }
         return $span;
+    }
+
+    protected function getPath(UriInterface $uri): string
+    {
+        return $uri->getPath();
     }
 }
