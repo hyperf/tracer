@@ -15,7 +15,6 @@ declare(strict_types=1);
  */
 namespace Hyperf\Tracer\Middleware;
 
-use Hyperf\Contract\ApplicationInterface;
 use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\HttpMessage\Exception\HttpException;
 use Hyperf\Tracer\ExceptionAppender;
@@ -43,6 +42,10 @@ class TraceMiddleware implements MiddlewareInterface
     private SpanTagManager $spanTagManager;
 
     private Tracer $tracer;
+
+    private array $sensitive_headers = [
+        'password', 'token', 'authentication', 'authorization',
+    ];
 
     public function __construct(Tracer $tracer, SwitchManager $switchManager, SpanTagManager $spanTagManager)
     {
@@ -102,6 +105,10 @@ class TraceMiddleware implements MiddlewareInterface
         $span->setTag($this->spanTagManager->get('request', 'path'), $path);
         $span->setTag($this->spanTagManager->get('request', 'method'), $request->getMethod());
         foreach ($request->getHeaders() as $key => $value) {
+            if (in_array(mb_strtolower($key), $this->sensitive_headers)) {
+                continue;
+            }
+
             $span->setTag($this->spanTagManager->get('request', 'header') . '.' . $key, implode(', ', $value));
         }
         return $span;
