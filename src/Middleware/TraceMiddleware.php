@@ -44,7 +44,7 @@ class TraceMiddleware implements MiddlewareInterface
     private Tracer $tracer;
 
     private array $sensitive_headers = [
-        'password', 'token', 'authentication', 'authorization',
+        'password', 'token', 'authentication', 'authorization', 'x-authentication'
     ];
 
     public function __construct(Tracer $tracer, SwitchManager $switchManager, SpanTagManager $spanTagManager)
