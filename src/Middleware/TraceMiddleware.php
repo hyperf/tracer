@@ -46,9 +46,7 @@ class TraceMiddleware implements MiddlewareInterface
 
     private array $config;
 
-    private array $sensitive_headers = [
-        'password', 'token', 'authentication', 'authorization', 'x-authentication',
-    ];
+    private string $sensitive_headers_regex = '/pass|auth|token|secret/i';
 
     public function __construct(
         Tracer $tracer,
@@ -117,7 +115,7 @@ class TraceMiddleware implements MiddlewareInterface
         $span->setTag($this->spanTagManager->get('request', 'path'), $path);
         $span->setTag($this->spanTagManager->get('request', 'method'), $request->getMethod());
         foreach ($request->getHeaders() as $key => $value) {
-            if (in_array(mb_strtolower($key), $this->sensitive_headers)) {
+            if (preg_match($this->sensitive_headers_regex, $key)) {
                 continue;
             }
 
