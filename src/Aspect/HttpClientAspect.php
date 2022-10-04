@@ -29,6 +29,7 @@ use OpenTracing\Tracer;
 use Psr\Http\Message\ResponseInterface;
 use Throwable;
 use const OpenTracing\Formats\TEXT_MAP;
+use const OpenTracing\Tags\SPAN_KIND_RPC_CLIENT;
 
 /** @Aspect */
 class HttpClientAspect implements AroundInterface
@@ -81,7 +82,9 @@ class HttpClientAspect implements AroundInterface
                 $method,
                 rtrim((string) ($base_uri ?? ''), '/'),
                 ltrim(parse_url($uri, PHP_URL_PATH) ?? '', '/')
-            )
+            ),
+            [],
+            SPAN_KIND_RPC_CLIENT
         );
 
         $span->setTag('category', 'http');
