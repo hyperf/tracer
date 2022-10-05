@@ -32,6 +32,7 @@ use Psr\Http\Message\UriInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Throwable;
+use const OpenTracing\Tags\SPAN_KIND_RPC_SERVER;
 
 class TraceMiddleware implements MiddlewareInterface
 {
@@ -107,7 +108,7 @@ class TraceMiddleware implements MiddlewareInterface
     {
         $path = $this->getPath($request->getUri());
 
-        $span = $this->startSpan($path);
+        $span = $this->startSpan($path, [], SPAN_KIND_RPC_SERVER);
 
         $span->setTag('kind', 'server');
 

@@ -61,7 +61,7 @@ class RedisAspect implements AroundInterface
         }
 
         $arguments = $proceedingJoinPoint->arguments['keys'];
-        $span = $this->startSpan('Redis' . '::' . $arguments['name']);
+        $span = $this->startSpan('redis' . '::' . $arguments['name']);
 
         $span->setTag('category', 'datastore');
         $span->setTag('component', 'Redis');

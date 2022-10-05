@@ -20,7 +20,7 @@ use OpenTracing\Span;
 use Psr\Http\Message\ServerRequestInterface;
 use const OpenTracing\Formats\TEXT_MAP;
 use const OpenTracing\Tags\SPAN_KIND;
-use const OpenTracing\Tags\SPAN_KIND_RPC_SERVER;
+use const OpenTracing\Tags\SPAN_KIND_RPC_CLIENT;
 
 trait SpanStarter
 {
@@ -30,7 +30,7 @@ trait SpanStarter
     protected function startSpan(
         string $name,
         array $option = [],
-        string $kind = SPAN_KIND_RPC_SERVER
+        string $kind = SPAN_KIND_RPC_CLIENT
     ): Span {
         $root = $this->getTracerRoot(Coroutine::id());
         if (! $root instanceof Span) {

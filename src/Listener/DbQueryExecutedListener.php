@@ -49,7 +49,7 @@ class DbQueryExecutedListener implements ListenerInterface
             return;
         }
 
-        if (! ($event instanceof QueryExecuted)) {
+        if (! $event instanceof QueryExecuted) {
             return;
         }
 

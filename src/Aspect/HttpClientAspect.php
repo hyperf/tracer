@@ -82,9 +82,7 @@ class HttpClientAspect implements AroundInterface
                 $method,
                 rtrim((string) ($base_uri ?? ''), '/'),
                 ltrim(parse_url($uri, PHP_URL_PATH) ?? '', '/')
-            ),
-            [],
-            SPAN_KIND_RPC_CLIENT
+            )
         );
 
         $span->setTag('category', 'http');
