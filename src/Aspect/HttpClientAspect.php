@@ -28,8 +28,8 @@ use OpenTracing\Span;
 use OpenTracing\Tracer;
 use Psr\Http\Message\ResponseInterface;
 use Throwable;
+
 use const OpenTracing\Formats\TEXT_MAP;
-use const OpenTracing\Tags\SPAN_KIND_RPC_CLIENT;
 
 /** @Aspect */
 class HttpClientAspect implements AroundInterface
@@ -81,7 +81,7 @@ class HttpClientAspect implements AroundInterface
                 '%s %s/%s',
                 $method,
                 rtrim((string) ($base_uri ?? ''), '/'),
-                ltrim(parse_url($uri, PHP_URL_PATH) ?? '', '/')
+                ltrim(parse_url($this->clearUri($uri), PHP_URL_PATH) ?? '', '/')
             )
         );
 
@@ -117,6 +117,15 @@ class HttpClientAspect implements AroundInterface
         $span->finish();
 
         return $result;
+    }
+
+    protected function clearUri(string $uri): string
+    {
+        return preg_replace(
+            '/\/[0-9]+\//',
+            '/****/',
+            $uri
+        );
     }
 
     private function onFullFilled(Span $span): callable
