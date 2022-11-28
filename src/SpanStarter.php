@@ -14,7 +14,7 @@ namespace Hyperf\Tracer;
 use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\Engine\Exception\CoroutineDestroyedException;
 use Hyperf\Utils\ApplicationContext;
-use Hyperf\Utils\Context;
+use Hyperf\Context\Context;
 use Hyperf\Utils\Coroutine;
 use OpenTracing\Span;
 use Psr\Http\Message\ServerRequestInterface;
