@@ -29,17 +29,17 @@
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.1",
-        "hyperf/config": "^2.2",
-        "hyperf/database": "^2.2",
-        "hyperf/event": "^2.2",
-        "hyperf/http-message": "^2.2",
-        "hyperf/redis": "^2.2",
+        "hyperf/config": "^2.2|^3.0",
+        "hyperf/database": "^2.2|^3.0",
+        "hyperf/event": "^2.2|^3.0",
+        "hyperf/http-message": "^2.2|^3.0",
+        "hyperf/redis": "^2.2|^3.0",
         "mockery/mockery": "^1.4",
         "phpunit/phpunit": "^9.5",
         "psr/http-server-handler": "^1.0",
         "psr/http-server-middleware": "^1.0",
         "roave/security-advisories": "dev-latest",
-        "swoole/ide-helper": "^4.7"
+        "swoole/ide-helper": "^4.7|^5.0"
     },
     "suggest": {
         "hyperf/event": "Required to use DbQueryExecutedListener."
@@ -58,9 +58,6 @@
         "sort-packages": true
     },
     "extra": {
-        "branch-alias": {
-            "dev-master": "2.2-dev"
-        },
         "hyperf": {
             "config": "Hyperf\\Tracer\\ConfigProvider"
         }
