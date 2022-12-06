@@ -23,13 +23,13 @@ return (new PhpCsFixer\Config())
             'location' => 'after_declare_strict',
         ],
         'array_syntax' => [
-            'syntax' => 'short'
+            'syntax' => 'short',
         ],
         'list_syntax' => [
-            'syntax' => 'short'
+            'syntax' => 'short',
         ],
         'concat_space' => [
-            'spacing' => 'one'
+            'spacing' => 'one',
         ],
         'blank_line_before_statement' => [
             'statements' => [
@@ -38,7 +38,7 @@ return (new PhpCsFixer\Config())
         ],
         'general_phpdoc_annotation_remove' => [
             'annotations' => [
-                'author'
+                'author',
             ],
         ],
         'ordered_imports' => [
@@ -80,9 +80,17 @@ return (new PhpCsFixer\Config())
         'single_quote' => true,
         'standardize_not_equals' => true,
         'multiline_comment_opening_closing' => true,
+        'php_unit_test_class_requires_covers' => false,
+        'global_namespace_import' => [
+            'import_classes' => true,
+            'import_constants' => true,
+            'import_functions' => true,
+        ],
     ])
     ->setFinder(
         PhpCsFixer\Finder::create()
+            ->exclude('public')
+            ->exclude('runtime')
             ->exclude('vendor')
             ->in(__DIR__)
     )

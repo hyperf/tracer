@@ -49,10 +49,10 @@ class RedisAspect implements AroundInterface
     }
 
     /**
+     * @return mixed return the value from process method of ProceedingJoinPoint, or the value that you handled
      * @throws Exception
      * @throws JsonException
      * @throws Throwable
-     * @return mixed return the value from process method of ProceedingJoinPoint, or the value that you handled
      */
     public function process(ProceedingJoinPoint $proceedingJoinPoint)
     {
@@ -61,7 +61,7 @@ class RedisAspect implements AroundInterface
         }
 
         $arguments = $proceedingJoinPoint->arguments['keys'];
-        $span = $this->startSpan('redis' . '::' . $arguments['name']);
+        $span = $this->startSpan('redis::' . $arguments['name']);
 
         $span->setTag('category', 'datastore');
         $span->setTag('component', 'Redis');

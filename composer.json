@@ -61,5 +61,9 @@
         "hyperf": {
             "config": "Hyperf\\Tracer\\ConfigProvider"
         }
+    },
+    "scripts": {
+        "test": "php bin/phpunit.php",
+        "lint": "php-cs-fixer fix"
     }
 }

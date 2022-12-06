@@ -13,6 +13,7 @@ namespace Hyperf\Tracer;
 
 use OpenTracing\Span;
 use Throwable;
+
 use function get_class;
 
 trait ExceptionAppender

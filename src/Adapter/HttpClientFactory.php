@@ -13,6 +13,7 @@ namespace Hyperf\Tracer\Adapter;
 
 use Hyperf\Guzzle\ClientFactory as GuzzleClientFactory;
 use RuntimeException;
+
 use function strlen;
 
 class HttpClientFactory

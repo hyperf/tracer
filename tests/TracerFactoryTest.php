@@ -64,7 +64,7 @@ class TracerFactoryTest extends TestCase
         $container->allows('get')
             ->with(JaegerTracerFactory::class)
             ->andReturns(new JaegerTracerFactory($config));
-        
+
         $container->allows('get')
             ->with(ConfigInterface::class)
             ->andReturns($config);

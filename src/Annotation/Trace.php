@@ -20,9 +20,6 @@ use Hyperf\Di\Annotation\AbstractAnnotation;
  */
 class Trace extends AbstractAnnotation
 {
-    /**
-     * @var string
-     */
     public string $name = '';
 
     /**

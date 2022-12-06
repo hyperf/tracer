@@ -44,9 +44,9 @@ class TraceAnnotationAspect implements AroundInterface
     }
 
     /**
+     * @return mixed return the value from process method of ProceedingJoinPoint, or the value that you handled
      * @throws Exception
      * @throws Throwable
-     * @return mixed return the value from process method of ProceedingJoinPoint, or the value that you handled
      */
     public function process(ProceedingJoinPoint $proceedingJoinPoint)
     {

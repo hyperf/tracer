@@ -44,7 +44,7 @@ class TracerFactory
 
         $factory = $container->get($driver);
 
-        if (! ($factory instanceof NamedFactoryInterface)) {
+        if (! $factory instanceof NamedFactoryInterface) {
             throw new InvalidArgumentException(
                 sprintf('The driver %s is not a valid factory.', $driver)
             );

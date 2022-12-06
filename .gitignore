@@ -1,3 +1,6 @@
-vendor/
 *.cache
-/.idea
+.idea/
+clover-coverage-report.xml
+coverage/
+runtime/
+vendor/
