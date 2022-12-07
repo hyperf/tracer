@@ -119,11 +119,11 @@ class HttpClientAspect implements AroundInterface
         return $result;
     }
 
-    protected function clearUri(string $uri): string
+    public function clearUri(string $uri): string
     {
         return preg_replace(
-            '/\/[0-9]+\/?/',
-            '/<NUMBER>/',
+            ['#/\d+/#', '#/\d+$#'],
+            ['/<NUMBER>/', '/<NUMBER>'],
             $uri
         );
     }
