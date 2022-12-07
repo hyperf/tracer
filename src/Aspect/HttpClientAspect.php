@@ -122,8 +122,8 @@ class HttpClientAspect implements AroundInterface
     protected function clearUri(string $uri): string
     {
         return preg_replace(
-            '/\/[0-9]+\//',
-            '/****/',
+            '/\/[0-9]+\/?/',
+            '/<NUMBER>/',
             $uri
         );
     }
