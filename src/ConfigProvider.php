@@ -13,6 +13,7 @@ namespace Hyperf\Tracer;
 
 use GuzzleHttp\Client;
 use Hyperf\Tracer\Listener\DbQueryExecutedListener;
+use Jaeger\SpanContext;
 use Jaeger\ThriftUdpTransport;
 use OpenTracing\Tracer;
 
@@ -37,6 +38,7 @@ class ConfigProvider
                     ],
                     'class_map' => [
                         ThriftUdpTransport::class => __DIR__ . '/../class_map/ThriftUdpTransport.php',
+                        SpanContext::class => __DIR__ . '/../class_map/SpanContext.php',
                     ],
                 ],
             ],

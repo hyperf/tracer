@@ -14,6 +14,7 @@ namespace Hyperf\Tracer;
 use Hyperf\Context\Context;
 use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\Engine\Exception\CoroutineDestroyedException;
+use Hyperf\Tracer\Support\Uuid;
 use Hyperf\Utils\ApplicationContext;
 use Hyperf\Utils\Coroutine;
 use OpenTracing\Span;
@@ -56,6 +57,11 @@ trait SpanStarter
             }
             $root = $this->tracer->startSpan($name, $option);
             $root->setTag(SPAN_KIND, $kind);
+
+            if ($spanContext === null && ! empty($correlationId = $request->getHeaderLine('X-Request-ID'))) {
+                $root->getContext()->setTraceId((string) Uuid::asInt($correlationId));
+            }
+
             Context::set('tracer.root', $root);
             return $root;
         }

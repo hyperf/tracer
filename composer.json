@@ -16,7 +16,7 @@
         "source": "https://github.com/PicPay/hyperf-tracer"
     },
     "require": {
-        "php": ">=7.4",
+        "php": ">=8.0",
         "ext-json": "*",
         "ext-sockets": "*",
         "hyperf/contract": "^2.2|^3.0",
