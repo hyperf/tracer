@@ -40,15 +40,15 @@ class TraceMiddleware implements MiddlewareInterface
     use SpanStarter;
     use ExceptionAppender;
 
-    private SwitchManager $switchManager;
+    protected SwitchManager $switchManager;
 
-    private SpanTagManager $spanTagManager;
+    protected SpanTagManager $spanTagManager;
 
-    private Tracer $tracer;
+    protected Tracer $tracer;
 
-    private array $config;
+    protected array $config;
 
-    private string $sensitive_headers_regex = '/pass|auth|token|secret/i';
+    protected string $sensitive_headers_regex = '/pass|auth|token|secret/i';
 
     public function __construct(
         Tracer $tracer,
@@ -92,17 +92,29 @@ class TraceMiddleware implements MiddlewareInterface
             $response = $handler->handle($request);
             $span->setTag($this->spanTagManager->get('response', 'status_code'), $response->getStatusCode());
             $span->setTag('otel.status_code', 'OK');
+            $this->appendCustomResponseSpan($span, $response);
         } catch (Throwable $exception) {
             $this->switchManager->isEnabled('exception') && $this->appendExceptionToSpan($span, $exception);
             if ($exception instanceof HttpException) {
                 $span->setTag($this->spanTagManager->get('response', 'status_code'), $exception->getStatusCode());
             }
+            $this->appendCustomExceptionSpan($span, $exception);
             throw $exception;
         } finally {
             $span->finish();
         }
 
         return $response;
+    }
+
+    protected function appendCustomExceptionSpan(Span $span, Throwable $exception): void
+    {
+        // just for override
+    }
+
+    protected function appendCustomResponseSpan(Span $span, ResponseInterface $response): void
+    {
+        // just for override
     }
 
     protected function buildSpan(ServerRequestInterface $request): Span
