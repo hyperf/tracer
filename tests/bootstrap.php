@@ -9,12 +9,6 @@ declare(strict_types=1);
  * @contact  leo@opencodeco.dev
  * @license  https://github.com/opencodeco/hyperf-metric/blob/main/LICENSE
  */
-namespace Hyperf\Tracer\Contract;
+define('BASE_PATH', dirname(__DIR__, 1));
 
-interface NamedFactoryInterface
-{
-    /**
-     * Create the object from factory.
-     */
-    public function make(string $name): \OpenTracing\Tracer;
-}
+require_once BASE_PATH . '/vendor/autoload.php';

@@ -2,31 +2,36 @@
 
 declare(strict_types=1);
 /**
- * This file is part of Hyperf.
+ * This file is part of Hyperf + OpenCodeCo
  *
- * @link     https://www.hyperf.io
+ * @link     https://opencodeco.dev
  * @document https://hyperf.wiki
- * @contact  group@hyperf.io
- * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ * @contact  leo@opencodeco.dev
+ * @license  https://github.com/opencodeco/hyperf-metric/blob/main/LICENSE
  */
 namespace Hyperf\Tracer;
 
+use Exception;
 use Hyperf\Contract\ConfigInterface;
-use Hyperf\Tracer\Adapter\ZipkinTracerFactory;
+use Hyperf\Tracer\Adapter\JaegerTracerFactory;
 use Hyperf\Tracer\Contract\NamedFactoryInterface;
-use Hyperf\Tracer\Exception\InvalidArgumentException;
+use InvalidArgumentException;
+use OpenTracing\Tracer;
 use Psr\Container\ContainerInterface;
 
 class TracerFactory
 {
-    public function __invoke(ContainerInterface $container)
+    /**
+     * @throws Exception
+     */
+    public function __invoke(ContainerInterface $container): Tracer
     {
         $config = $container->get(ConfigInterface::class);
         $name = $config->get('opentracing.default');
 
         // v1.0 has no 'default' config. Fallback to v1.0 mode for backward compatibility.
         if (empty($name)) {
-            $factory = $container->get(ZipkinTracerFactory::class);
+            $factory = $container->get(JaegerTracerFactory::class);
             return $factory->make('');
         }
 

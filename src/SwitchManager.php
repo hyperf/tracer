@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 /**
- * This file is part of Hyperf.
+ * This file is part of Hyperf + OpenCodeCo
  *
- * @link     https://www.hyperf.io
+ * @link     https://opencodeco.dev
  * @document https://hyperf.wiki
- * @contact  group@hyperf.io
- * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ * @contact  leo@opencodeco.dev
+ * @license  https://github.com/opencodeco/hyperf-metric/blob/main/LICENSE
  */
 namespace Hyperf\Tracer;
 
@@ -16,10 +16,7 @@ use OpenTracing\Span;
 
 class SwitchManager
 {
-    /**
-     * @var array
-     */
-    private $config
+    private array $config
         = [
             'guzzle' => false,
             'redis' => false,

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 /**
- * This file is part of Hyperf.
+ * This file is part of Hyperf + OpenCodeCo
  *
- * @link     https://www.hyperf.io
+ * @link     https://opencodeco.dev
  * @document https://hyperf.wiki
- * @contact  group@hyperf.io
- * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ * @contact  leo@opencodeco.dev
+ * @license  https://github.com/opencodeco/hyperf-metric/blob/main/LICENSE
  */
 namespace Jaeger;
 
@@ -26,35 +26,15 @@ use Throwable;
 
 class ThriftUdpTransport extends TTransport
 {
-    /**
-     * @var string
-     */
-    private $host;
+    private null|resource|Socket $socket = null;
 
-    /**
-     * @var int
-     */
-    private $port;
+    private ?Channel $chan = null;
 
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
-     * @var null|resource|Socket
-     */
-    private $socket;
-
-    /**
-     * @var ?Channel
-     */
-    private $chan;
-
-    public function __construct(string $host, int $port, LoggerInterface $logger = null)
-    {
-        $this->host = $host;
-        $this->port = $port;
+    public function __construct(
+        private string $host,
+        private int $port,
+        private LoggerInterface $logger = null
+    ) {
         $this->logger = $logger ?? new NullLogger();
     }
 

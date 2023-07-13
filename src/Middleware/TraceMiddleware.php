@@ -1,37 +1,63 @@
 <?php
+/**
+ * @noinspection UnknownInspectionInspection
+ * @noinspection PhpUnused
+ */
 
 declare(strict_types=1);
 /**
- * This file is part of Hyperf.
+ * This file is part of Hyperf + OpenCodeCo
  *
- * @link     https://www.hyperf.io
+ * @link     https://opencodeco.dev
  * @document https://hyperf.wiki
- * @contact  group@hyperf.io
- * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ * @contact  leo@opencodeco.dev
+ * @license  https://github.com/opencodeco/hyperf-metric/blob/main/LICENSE
  */
 namespace Hyperf\Tracer\Middleware;
 
-use Hyperf\Coroutine\Coroutine;
+use Hyperf\Contract\ConfigInterface;
+use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\HttpMessage\Exception\HttpException;
+use Hyperf\Tracer\ExceptionAppender;
 use Hyperf\Tracer\SpanStarter;
 use Hyperf\Tracer\SpanTagManager;
+use Hyperf\Tracer\Support\Uri;
 use Hyperf\Tracer\SwitchManager;
+use Hyperf\Utils\ApplicationContext;
+use Hyperf\Utils\Coroutine;
 use OpenTracing\Span;
 use OpenTracing\Tracer;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\UriInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Throwable;
 
-use function Hyperf\Coroutine\defer;
+use const OpenTracing\Tags\SPAN_KIND_RPC_SERVER;
 
 class TraceMiddleware implements MiddlewareInterface
 {
     use SpanStarter;
+    use ExceptionAppender;
 
-    public function __construct(private Tracer $tracer, private SwitchManager $switchManager, private SpanTagManager $spanTagManager)
-    {
+    protected SpanTagManager $spanTagManager;
+
+    protected Tracer $tracer;
+
+    protected array $config;
+
+    protected string $sensitive_headers_regex = '/pass|auth|token|secret/i';
+
+    public function __construct(
+        Tracer $tracer,
+        protected SwitchManager $switchManager,
+        SpanTagManager $spanTagManager,
+        ConfigInterface $config,
+    ) {
+        $this->tracer = $tracer;
+        $this->spanTagManager = $spanTagManager;
+        $this->config = $config->get('opentracing');
     }
 
     /**
@@ -39,25 +65,38 @@ class TraceMiddleware implements MiddlewareInterface
      * Processes an incoming server request in order to produce a response.
      * If unable to produce the response itself, it may delegate to the provided
      * request handler to do so.
+     * @throws Throwable
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+        if (! empty($this->config['ignore_path']) && preg_match($this->config['ignore_path'], $request->getUri()->getPath())) {
+            return $handler->handle($request);
+        }
+
         $span = $this->buildSpan($request);
 
         defer(function () {
             try {
                 $this->tracer->flush();
-            } catch (\Throwable) {
+            } catch (Throwable $exception) {
+                if (ApplicationContext::hasContainer() && ApplicationContext::getContainer()->has(StdoutLoggerInterface::class)) {
+                    ApplicationContext::getContainer()
+                        ->get(StdoutLoggerInterface::class)
+                        ->error($exception->getMessage());
+                }
             }
         });
         try {
             $response = $handler->handle($request);
             $span->setTag($this->spanTagManager->get('response', 'status_code'), $response->getStatusCode());
+            $span->setTag('otel.status_code', 'OK');
+            $this->appendCustomResponseSpan($span, $response);
         } catch (Throwable $exception) {
-            $this->switchManager->isEnable('exception') && $this->appendExceptionToSpan($span, $exception);
+            $this->switchManager->isEnabled('exception') && $this->appendExceptionToSpan($span, $exception);
             if ($exception instanceof HttpException) {
                 $span->setTag($this->spanTagManager->get('response', 'status_code'), $exception->getStatusCode());
             }
+            $this->appendCustomExceptionSpan($span, $exception);
             throw $exception;
         } finally {
             $span->finish();
@@ -66,25 +105,49 @@ class TraceMiddleware implements MiddlewareInterface
         return $response;
     }
 
-    protected function appendExceptionToSpan(Span $span, Throwable $exception): void
+    protected function appendCustomExceptionSpan(Span $span, Throwable $exception): void
     {
-        $span->setTag('error', true);
-        $span->setTag($this->spanTagManager->get('exception', 'class'), get_class($exception));
-        $span->setTag($this->spanTagManager->get('exception', 'code'), $exception->getCode());
-        $span->setTag($this->spanTagManager->get('exception', 'message'), $exception->getMessage());
-        $span->setTag($this->spanTagManager->get('exception', 'stack_trace'), (string) $exception);
+        // just for override
+    }
+
+    protected function appendCustomResponseSpan(Span $span, ResponseInterface $response): void
+    {
+        // just for override
     }
 
     protected function buildSpan(ServerRequestInterface $request): Span
     {
-        $uri = $request->getUri();
-        $span = $this->startSpan('request');
+        $path = $this->getPath($request->getUri());
+
+        $span = $this->startSpan($path, [], SPAN_KIND_RPC_SERVER);
+
+        $span->setTag('kind', 'server');
+
         $span->setTag($this->spanTagManager->get('coroutine', 'id'), (string) Coroutine::id());
-        $span->setTag($this->spanTagManager->get('request', 'path'), (string) $uri);
+        $span->setTag($this->spanTagManager->get('request', 'path'), $path);
         $span->setTag($this->spanTagManager->get('request', 'method'), $request->getMethod());
+
         foreach ($request->getHeaders() as $key => $value) {
+            if (preg_match($this->sensitive_headers_regex, $key)) {
+                continue;
+            }
+
             $span->setTag($this->spanTagManager->get('request', 'header') . '.' . $key, implode(', ', $value));
         }
+
+        foreach ($request->getAttributes() as $key => $value) {
+            if (! is_string($value) || empty($value)) {
+                continue;
+            }
+
+            $span->setTag("attribute.{$key}", $value);
+        }
+
         return $span;
+    }
+
+    protected function getPath(UriInterface $uri): string
+    {
+        return Uri::sanitize($uri->getPath());
     }
 }

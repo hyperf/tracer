@@ -2,20 +2,23 @@
 
 declare(strict_types=1);
 /**
- * This file is part of Hyperf.
+ * This file is part of Hyperf + OpenCodeCo
  *
- * @link     https://www.hyperf.io
+ * @link     https://opencodeco.dev
  * @document https://hyperf.wiki
- * @contact  group@hyperf.io
- * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ * @contact  leo@opencodeco.dev
+ * @license  https://github.com/opencodeco/hyperf-metric/blob/main/LICENSE
  */
 namespace Hyperf\Tracer;
 
 use GuzzleHttp\Client;
 use Hyperf\Tracer\Aspect\HttpClientAspect;
+use Hyperf\Tracer\Aspect\MongoCollectionAspect;
 use Hyperf\Tracer\Aspect\RedisAspect;
 use Hyperf\Tracer\Aspect\TraceAnnotationAspect;
 use Hyperf\Tracer\Listener\DbQueryExecutedListener;
+use Hyperf\Tracer\Middleware\TraceMiddleware;
+use Jaeger\SpanContext;
 use Jaeger\ThriftUdpTransport;
 use OpenTracing\Tracer;
 use Zipkin\Propagation\Map;
@@ -34,11 +37,15 @@ class ConfigProvider
             'listeners' => [
                 DbQueryExecutedListener::class,
             ],
+            'middlewares' => [
+                TraceMiddleware::class,
+            ],
             'annotations' => [
                 'scan' => [
                     'class_map' => [
                         Map::class => __DIR__ . '/../class_map/Map.php',
                         ThriftUdpTransport::class => __DIR__ . '/../class_map/ThriftUdpTransport.php',
+                        SpanContext::class => __DIR__ . '/../class_map/SpanContext.php',
                     ],
                 ],
             ],
@@ -46,6 +53,7 @@ class ConfigProvider
                 HttpClientAspect::class,
                 RedisAspect::class,
                 TraceAnnotationAspect::class,
+                MongoCollectionAspect::class,
             ],
             'publish' => [
                 [

@@ -1,0 +1,11 @@
+parameters:
+  bootstrapFiles:
+    - tests/bootstrap.php
+  paths:
+    - src
+    - tests
+  inferPrivatePropertyTypeFromConstructor: true
+  treatPhpDocTypesAsCertain: true
+  reportUnmatchedIgnoredErrors: false
+  ignoreErrors:
+    - '#Variable .* in PHPDoc tag @var does not exist#'

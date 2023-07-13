@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 /**
- * This file is part of Hyperf.
+ * This file is part of Hyperf + OpenCodeCo
  *
- * @link     https://www.hyperf.io
+ * @link     https://opencodeco.dev
  * @document https://hyperf.wiki
- * @contact  group@hyperf.io
- * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ * @contact  leo@opencodeco.dev
+ * @license  https://github.com/opencodeco/hyperf-metric/blob/main/LICENSE
  */
 namespace Hyperf\Tracer\Listener;
 
@@ -51,9 +51,17 @@ class DbQueryExecutedListener implements ListenerInterface
         }
 
         $endTime = microtime(true);
-        $span = $this->startSpan($this->spanTagManager->get('db', 'db.query'), [
+        $span = $this->startSpan($sql, [
             'start_time' => (int) (($endTime - $event->time / 1000) * 1000 * 1000),
         ]);
+
+        $span->setTag('category', 'datastore');
+        $span->setTag('component', 'MySQL');
+        $span->setTag('kind', 'client');
+        $span->setTag('otel.status_code', 'OK');
+        $span->setTag('db.system', 'mysql');
+        $span->setTag('db.name', $event->connectionName);
+
         $span->setTag($this->spanTagManager->get('db', 'db.statement'), $sql);
         $span->setTag($this->spanTagManager->get('db', 'db.query_time'), $event->time . ' ms');
         $span->finish((int) ($endTime * 1000 * 1000));

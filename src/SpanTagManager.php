@@ -2,26 +2,26 @@
 
 declare(strict_types=1);
 /**
- * This file is part of Hyperf.
+ * This file is part of Hyperf + OpenCodeCo
  *
- * @link     https://www.hyperf.io
+ * @link     https://opencodeco.dev
  * @document https://hyperf.wiki
- * @contact  group@hyperf.io
- * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ * @contact  leo@opencodeco.dev
+ * @license  https://github.com/opencodeco/hyperf-metric/blob/main/LICENSE
  */
 namespace Hyperf\Tracer;
 
 class SpanTagManager
 {
-    private $tags = [
+    private array $tags = [
         'http_client' => [
             'http.url' => 'http.url',
             'http.method' => 'http.method',
             'http.status_code' => 'http.status_code',
         ],
         'redis' => [
-            'arguments' => 'redis.arguments',
-            'result' => 'redis.result',
+            'arguments' => 'db.arguments',
+            'result' => 'db.result',
         ],
         'db' => [
             'db.query' => 'db.query',
