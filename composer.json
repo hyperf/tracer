@@ -18,20 +18,20 @@
     },
     "require": {
         "php": ">=8.0",
-        "psr/http-message": "^1.0|^2.0",
         "hyperf/contract": "^3.0",
         "hyperf/di": "^3.0",
         "hyperf/guzzle": "^3.0",
         "hyperf/support": "^3.0",
         "hyperf/utils": "^3.0",
         "jcchavezs/zipkin-opentracing": "^2.0",
-        "opentracing/opentracing": "^1.0"
+        "jonahgeorge/jaeger-client-php": "^1.4",
+        "opentracing/opentracing": "^1.0",
+        "psr/http-message": "^1.0|^2.0"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.21",
         "hyperf/config": "^3.0",
         "hyperf/testing": "^3.0",
-        "jonahgeorge/jaeger-client-php": "^1.4",
         "mockery/mockery": "^1.6",
         "phpstan/extension-installer": "^1.3",
         "phpstan/phpstan": "^1.10",
