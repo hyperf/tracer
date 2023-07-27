@@ -37,7 +37,7 @@ class RedisAspect extends AbstractAspect
      */
     public function process(ProceedingJoinPoint $proceedingJoinPoint)
     {
-        if ($this->switchManager->isEnable('redis') === false) {
+        if ($this->switchManager->isEnabled('redis') === false) {
             return $proceedingJoinPoint->process();
         }
 

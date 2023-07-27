@@ -37,7 +37,7 @@ class SwitchManager
     /**
      * Determine if the tracer is enabled ?
      */
-    public function isEnable(string $identifier): bool
+    public function isEnabled(string $identifier): bool
     {
         if (! isset($this->config[$identifier])) {
             return false;

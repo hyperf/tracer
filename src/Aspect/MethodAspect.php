@@ -35,7 +35,7 @@ class MethodAspect extends AbstractAspect
      */
     public function process(ProceedingJoinPoint $proceedingJoinPoint)
     {
-        if ($this->switchManager->isEnable('method') === false) {
+        if ($this->switchManager->isEnabled('method') === false) {
             return $proceedingJoinPoint->process();
         }
 

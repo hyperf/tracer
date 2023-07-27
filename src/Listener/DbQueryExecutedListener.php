@@ -40,7 +40,7 @@ class DbQueryExecutedListener implements ListenerInterface
      */
     public function process(object $event): void
     {
-        if ($this->switchManager->isEnable('db') === false) {
+        if ($this->switchManager->isEnabled('db') === false) {
             return;
         }
         $sql = $event->sql;

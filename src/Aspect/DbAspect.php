@@ -37,7 +37,7 @@ class DbAspect extends AbstractAspect
      */
     public function process(ProceedingJoinPoint $proceedingJoinPoint)
     {
-        if ($this->switchManager->isEnable('db') === false) {
+        if ($this->switchManager->isEnabled('db') === false) {
             return $proceedingJoinPoint->process();
         }
 
