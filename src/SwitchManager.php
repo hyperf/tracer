@@ -39,10 +39,6 @@ class SwitchManager
      */
     public function isEnabled(string $identifier): bool
     {
-        if (! isset($this->config[$identifier])) {
-            return false;
-        }
-
-        return $this->config[$identifier] && Context::get('tracer.root') instanceof Span;
+        return $this->config[$identifier] ?? false;
     }
 }
