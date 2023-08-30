@@ -31,6 +31,7 @@ class ReporterFactory
 
         if ($class === \Zipkin\Reporters\Http::class) {
             $option['constructor']['requesterFactory'] = $this->httpClientFactory;
+            $option['constructor']['logger'] = $this->logger;
         }
         $constructor = $option['constructor'] ?? [];
         if (! class_exists($class)) {
