@@ -33,7 +33,7 @@ class ThriftUdpTransport extends TTransport
     public function __construct(
         private string $host,
         private int $port,
-        private LoggerInterface $logger = null
+        private ?LoggerInterface $logger = null
     ) {
         $this->logger = $logger ?? new NullLogger();
     }
