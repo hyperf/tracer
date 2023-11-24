@@ -77,7 +77,7 @@ class TraceMiddleware implements MiddlewareInterface
         $span->setTag('error', true);
         $span->setTag($this->spanTagManager->get('exception', 'class'), get_class($exception));
         $span->setTag($this->spanTagManager->get('exception', 'code'), $exception->getCode());
-        $span->setTag($this->spanTagManager->get('exception', 'message'), $exception->getMessage());
+        $span->setTag($this->spanTagManager->get('exception', 'message'), (string) $exception->getMessage());
         $span->setTag($this->spanTagManager->get('exception', 'stack_trace'), (string) $exception);
     }
 
