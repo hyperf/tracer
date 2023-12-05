@@ -15,8 +15,8 @@ use Hyperf\Context\Context;
 use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\Engine\Exception\CoroutineDestroyedException;
 use Hyperf\Tracer\Support\Uuid;
-use Hyperf\Utils\ApplicationContext;
-use Hyperf\Utils\Coroutine;
+use Hyperf\Context\ApplicationContext;
+use Hyperf\Coroutine\Coroutine;
 use OpenTracing\Span;
 use Psr\Http\Message\ServerRequestInterface;
 
