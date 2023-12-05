@@ -11,9 +11,6 @@ declare(strict_types=1);
  */
 namespace Hyperf\Tracer;
 
-use Hyperf\Context\Context;
-use OpenTracing\Span;
-
 class SwitchManager
 {
     private array $config

@@ -13,11 +13,11 @@ namespace HyperfTest\Tracer;
 
 use Exception;
 use Hyperf\Config\Config;
+use Hyperf\Context\ApplicationContext;
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Di\Container;
 use Hyperf\Tracer\Adapter\JaegerTracerFactory;
 use Hyperf\Tracer\TracerFactory;
-use Hyperf\Context\ApplicationContext;
 use Jaeger\Tracer;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;

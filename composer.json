@@ -53,7 +53,7 @@
         }
     },
     "scripts": {
-	"test": "co-phpunit",
+	    "test": "co-phpunit",
         "test-coverage": "co-phpunit --coverage-clover clover.xml",
         "cs-fix": "php-cs-fixer fix $1",
         "analyse": "phpstan analyse --memory-limit=-1 -l 5 -c phpstan.neon",

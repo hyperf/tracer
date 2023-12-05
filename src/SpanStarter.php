@@ -11,12 +11,12 @@ declare(strict_types=1);
  */
 namespace Hyperf\Tracer;
 
+use Hyperf\Context\ApplicationContext;
 use Hyperf\Context\Context;
 use Hyperf\Contract\StdoutLoggerInterface;
+use Hyperf\Coroutine\Coroutine;
 use Hyperf\Engine\Exception\CoroutineDestroyedException;
 use Hyperf\Tracer\Support\Uuid;
-use Hyperf\Context\ApplicationContext;
-use Hyperf\Coroutine\Coroutine;
 use OpenTracing\Span;
 use Psr\Http\Message\ServerRequestInterface;
 

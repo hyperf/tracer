@@ -15,16 +15,16 @@ declare(strict_types=1);
  */
 namespace Hyperf\Tracer\Middleware;
 
+use Hyperf\Context\ApplicationContext;
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Contract\StdoutLoggerInterface;
+use Hyperf\Coroutine\Coroutine;
 use Hyperf\HttpMessage\Exception\HttpException;
 use Hyperf\Tracer\ExceptionAppender;
 use Hyperf\Tracer\SpanStarter;
 use Hyperf\Tracer\SpanTagManager;
 use Hyperf\Tracer\Support\Uri;
 use Hyperf\Tracer\SwitchManager;
-use Hyperf\Context\ApplicationContext;
-use Hyperf\Coroutine\Coroutine;
 use OpenTracing\Span;
 use OpenTracing\Tracer;
 use Psr\Http\Message\ResponseInterface;
@@ -33,6 +33,8 @@ use Psr\Http\Message\UriInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Throwable;
+
+use function Hyperf\Coroutine\defer;
 
 use const OpenTracing\Tags\SPAN_KIND_RPC_SERVER;
 
