@@ -120,8 +120,9 @@ class TraceMiddleware implements MiddlewareInterface
     protected function buildSpan(ServerRequestInterface $request): Span
     {
         $path = $this->getPath($request->getUri());
+        $spanName = sprintf('%s %s', $request->getMethod(), $path);
 
-        $span = $this->startSpan($path, [], SPAN_KIND_RPC_SERVER);
+        $span = $this->startSpan($spanName, [], SPAN_KIND_RPC_SERVER);
 
         $span->setTag('kind', 'server');
 
