@@ -49,6 +49,7 @@ final class UriTest extends TestCase
         self::assertSame('/v7/test/<LICENSE-PLATE>/<LICENSE-PLATE>/<LICENSE-PLATE>', Uri::sanitize('/v7/test/PET9349/PET9349/PET9349'));
         self::assertSame('/v8/test/<LICENSE-PLATE>/<LICENSE-PLATE>/<LICENSE-PLATE>/', Uri::sanitize('/v8/test/PET9D49/PET9D49/PET9D49/'));
         self::assertSame('/v8/test/<LICENSE-PLATE>/<LICENSE-PLATE>/<LICENSE-PLATE>/', Uri::sanitize('/v8/test/PET9349/PET9349/PET9349/'));
+        self::assertSame('/v8/test/PET9349FOOBAR/foo/<LICENSE-PLATE>', Uri::sanitize('/v8/test/PET9349FOOBAR/foo/PET9349'));
     }
 
     public function testClearUriUuids(): void
@@ -68,6 +69,7 @@ final class UriTest extends TestCase
     public function testClearUriOids(): void
     {
         $oid = '650229807612bba4984d1fc7';
+        $oidLonger = 'ddb21302b3c66b5111bb99a907f783e2a29947f0';
 
         self::assertSame('/v1/test', Uri::sanitize('/v1/test'));
         self::assertSame('/v2/test/<OID>', Uri::sanitize("/v2/test/{$oid}"));
@@ -77,5 +79,7 @@ final class UriTest extends TestCase
         self::assertSame('/v6/test/<OID>/<OID>/', Uri::sanitize("/v6/test/{$oid}/{$oid}/"));
         self::assertSame('/v7/test/<OID>/<OID>/<OID>', Uri::sanitize("/v7/test/{$oid}/{$oid}/{$oid}"));
         self::assertSame('/v8/test/<OID>/<OID>/<OID>/', Uri::sanitize("/v8/test/{$oid}/{$oid}/{$oid}/"));
+        self::assertSame('/v2/token/<OID>/foo/<OID>', Uri::sanitize("/v2/token/{$oidLonger}/foo/{$oid}"));
+        self::assertSame('/v3/token/<OID>/foo/<OID>/bar', Uri::sanitize("/v3/token/$oidLonger/foo/{$oid}/bar"));
     }
 }
