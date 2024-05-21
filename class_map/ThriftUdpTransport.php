@@ -26,7 +26,7 @@ use Throwable;
 
 class ThriftUdpTransport extends TTransport
 {
-    private null|resource|Socket $socket = null;
+    private null|Socket $socket = null;
 
     private ?Channel $chan = null;
 
