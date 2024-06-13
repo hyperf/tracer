@@ -46,21 +46,15 @@ class JaegerTracerFactory implements NamedFactoryInterface
 
     private function parseConfig(): array
     {
-        $options = $this->getConfig('options', [
-            'sampler' => [
-                'type' => SAMPLER_TYPE_CONST,
-                'param' => true,
-            ],
-            'logging' => false
-        ]);
-
-        if (isset($options['tags'])) {
-            $options['tags'] = $this->sanitizeTags($options['tags']);
-        }
-
         return [
             $this->getConfig('name', 'skeleton'),
-            $options
+            $this->getConfig('options', [
+                'sampler' => [
+                    'type' => SAMPLER_TYPE_CONST,
+                    'param' => true,
+                ],
+                'logging' => false,
+            ]),
         ];
     }
 
@@ -72,14 +66,5 @@ class JaegerTracerFactory implements NamedFactoryInterface
     private function getPrefix(): string
     {
         return rtrim($this->prefix . $this->name, '.') . '.';
-    }
-
-    private function sanitizeTags(array $tags = []): array
-    {
-        $tagsSanitized = [];
-        foreach ($tags as $key => $value) {
-            $tagsSanitized[$key] = (is_array($value)) ? $value[0] : $value;
-        }
-        return $tagsSanitized;
     }
 }
