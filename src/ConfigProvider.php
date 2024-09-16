@@ -22,6 +22,7 @@ use Jaeger\SpanContext;
 use Jaeger\ThriftUdpTransport;
 use OpenTracing\Tracer;
 use Zipkin\Propagation\Map;
+use Jaeger\Codec\TextCodec;
 
 class ConfigProvider
 {
@@ -46,6 +47,7 @@ class ConfigProvider
                         Map::class => __DIR__ . '/../class_map/Map.php',
                         ThriftUdpTransport::class => __DIR__ . '/../class_map/ThriftUdpTransport.php',
                         SpanContext::class => __DIR__ . '/../class_map/SpanContext.php',
+                        TextCodec::class => __DIR__ . '/../class_map/TextCodec.php',
                     ],
                 ],
             ],
