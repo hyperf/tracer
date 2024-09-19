@@ -111,15 +111,13 @@ class TextCodecOtel implements CodecInterface
      */
     private function spanContextToString($traceId, $spanId, $flags)
     {
-        if (strlen($traceId) < 32) {
-            $start = mb_substr($traceId, 0, 3);
-            $end = mb_substr($traceId, -3);
-            $middle = mb_substr($traceId, 3, mb_strlen($traceId) - 6);
-            $traceId = $start . $middle . $middle . $end;
-            $spanId = strtolower(dechex((int)$spanId));
-        }
         $flags = str_pad($flags, 2, "0", STR_PAD_LEFT);
-        return sprintf('%s-%s-%s-%s', self::VERSION, $traceId, $spanId, $flags);
+        return sprintf('%s-%s-%s-%s',
+            self::VERSION,
+            JaegerDecoder::traceIdDecoder($traceId),
+            JaegerDecoder::spanIdDecoder($spanId),
+            $flags
+        );
     }
 
     /**
