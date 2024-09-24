@@ -50,7 +50,11 @@ class TextCodecOtel implements CodecInterface
         $baggageHeader = [];
 
         foreach ($baggage as $key => $value) {
-            $baggageHeader[] = $key . '=' . $value;
+            $value = $key . '=' . $value;
+            if (!GuzzleHeaderValidate::isValidHeaderValue($value)) {
+                continue;
+            }
+            $baggageHeader[] = $value;
         }
         $carrier[$this->traceStateHeader] = implode(',', $baggageHeader);
     }

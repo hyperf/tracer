@@ -2,6 +2,7 @@
 
 namespace Jaeger\Codec;
 
+use Hyperf\Tracer\Support\GuzzleHeaderValidate;
 use Hyperf\Tracer\Support\TextCodecOtel;
 use Exception;
 use Jaeger\SpanContext;
@@ -76,8 +77,12 @@ class TextCodec implements CodecInterface
             if ($this->urlEncoding) {
                 $encodedValue = urlencode($value);
             }
+            $headerName = $this->baggagePrefix . $key;
 
-            $carrier[$this->baggagePrefix . $key] = $encodedValue;
+            if (!GuzzleHeaderValidate::isValidHeader($headerName, $encodedValue)) {
+                continue;
+            }
+            $carrier[$headerName] = $encodedValue;
         }
     }
 
