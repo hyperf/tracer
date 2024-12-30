@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @contact  leo@opencodeco.dev
  * @license  https://github.com/opencodeco/hyperf-metric/blob/main/LICENSE
  */
+
 namespace Hyperf\Tracer\Adapter;
 
 use Hyperf\Contract\ConfigInterface;
@@ -26,9 +27,7 @@ class JaegerTracerFactory implements NamedFactoryInterface
 
     private string $name = '';
 
-    public function __construct(private ConfigInterface $config, private ?LoggerInterface $logger = null, private ?CacheItemPoolInterface $cache = null)
-    {
-    }
+    public function __construct(private ConfigInterface $config, private LoggerInterface $logger, private ?CacheItemPoolInterface $cache = null) {}
 
     public function make(string $name): Tracer
     {

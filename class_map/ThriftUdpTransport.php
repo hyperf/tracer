@@ -9,20 +9,20 @@ declare(strict_types=1);
  * @contact  leo@opencodeco.dev
  * @license  https://github.com/opencodeco/hyperf-metric/blob/main/LICENSE
  */
+
 namespace Jaeger;
 
-use Hyperf\Context\ApplicationContext;
-use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\Coordinator\Constants;
 use Hyperf\Coordinator\CoordinatorManager;
 use Hyperf\Coroutine\Coroutine;
 use Hyperf\Engine\Channel;
 use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
 use Socket;
 use Thrift\Exception\TTransportException;
 use Thrift\Transport\TTransport;
 use Throwable;
+
+use function Hyperf\Support\env;
 
 class ThriftUdpTransport extends TTransport
 {
@@ -33,10 +33,8 @@ class ThriftUdpTransport extends TTransport
     public function __construct(
         private string $host,
         private int $port,
-        private ?LoggerInterface $logger = null
-    ) {
-        $this->logger = $logger ?? new NullLogger();
-    }
+        private LoggerInterface $logger
+    ) {}
 
     /**
      * Whether this transport is open.
@@ -120,9 +118,17 @@ class ThriftUdpTransport extends TTransport
             $this->loop();
         }
 
-        $this->chan->push(function () use ($buf) {
+        $pushed = $this->chan->push(function () use ($buf) {
             $this->doWrite($buf);
-        });
+        }, (float) env('TRACE_THRIFT_UDP_TIMEOUT', 0.1));
+
+        if (! $pushed) {
+            $this->logger->error('ThriftUdpTransport error:' . match (true) {
+                $this->chan->isTimeout() => 'Channel Timeout',
+                $this->chan->isClosing() => 'Channel Close',
+                default => 'Channel Error'
+            });
+        }
     }
 
     private function doOpen(): void
@@ -151,7 +157,14 @@ class ThriftUdpTransport extends TTransport
         $this->chan = new Channel(1);
         Coroutine::create(function () {
             while (true) {
-                $this->doOpen();
+                try {
+                    $this->doOpen();
+                } catch (Throwable $e) {
+                    $this->chan->close();
+                    $this->chan = null;
+                    throw $e;
+                }
+
                 while (true) {
                     try {
                         $closure = $this->chan->pop();
@@ -160,13 +173,7 @@ class ThriftUdpTransport extends TTransport
                         }
                         $closure->call($this);
                     } catch (Throwable $e) {
-                        if (ApplicationContext::hasContainer()) {
-                            if (ApplicationContext::getContainer()->has(StdoutLoggerInterface::class)) {
-                                ApplicationContext::getContainer()
-                                    ->get(StdoutLoggerInterface::class)
-                                    ->error('ThriftUdpTransport error:' . $e->getMessage());
-                            }
-                        }
+                            $this->logger->error('ThriftUdpTransport error:' . $e->getMessage());
                         @socket_close($this->socket);
                         $this->socket = null;
                         break;
