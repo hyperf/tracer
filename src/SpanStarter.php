@@ -70,7 +70,7 @@ trait SpanStarter
         return $child;
     }
 
-    private function getTracerRoot(int $coroutineId): ?Span
+    public function getTracerRoot(int $coroutineId): ?Span
     {
         /** @var null|Span $root */
         $root = Context::get('tracer.root', null, $coroutineId);

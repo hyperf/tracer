@@ -92,7 +92,7 @@ class TraceMiddleware implements MiddlewareInterface
             $response = $handler->handle($request);
             $span->setTag($this->spanTagManager->get('response', 'status_code'), $response->getStatusCode());
             $span->setTag('otel.status_code', 'OK');
-            $this->appendCustomResponseSpan($span, $response);
+            $this->appendCustomResponseSpan($span, $request, $response);
         } catch (Throwable $exception) {
             $this->switchManager->isEnabled('exception') && $this->appendExceptionToSpan($span, $exception);
             if ($exception instanceof HttpException) {
@@ -112,7 +112,12 @@ class TraceMiddleware implements MiddlewareInterface
         // just for override
     }
 
-    protected function appendCustomResponseSpan(Span $span, ResponseInterface $response): void
+    protected function appendCustomSpan(Span $span, ServerRequestInterface $request): void
+    {
+        // just for override
+    }
+
+    protected function appendCustomResponseSpan(Span $span, ServerRequestInterface $request, ResponseInterface $response): void
     {
         // just for override
     }
@@ -145,6 +150,8 @@ class TraceMiddleware implements MiddlewareInterface
 
             $span->setTag("attribute.{$key}", $value);
         }
+
+        $this->appendCustomSpan($span, $request);
 
         return $span;
     }

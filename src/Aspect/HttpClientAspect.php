@@ -104,31 +104,45 @@ class HttpClientAspect implements AroundInterface
         $options['headers'] = array_replace($options['headers'] ?? [], $appendHeaders);
         $proceedingJoinPoint->arguments['keys']['options'] = $options;
 
+        $this->appendCustomSpan($span, $options);
+
         /** @var PromiseInterface $result */
         $result = $proceedingJoinPoint->process();
         $result->then(
-            $this->onFullFilled($span),
-            $this->onRejected($span)
+            $this->onFullFilled($span, $options),
+            $this->onRejected($span, $options)
         );
         $span->finish();
 
         return $result;
     }
 
-    private function onFullFilled(Span $span): callable
+    protected function appendCustomSpan(Span $span, array $options): void
     {
-        return function (ResponseInterface $response) use ($span) {
+        // just for override
+    }
+
+    protected function appendCustomResponseSpan(Span $span, array $options, ?ResponseInterface $response): void
+    {
+        // just for override
+    }
+
+    private function onFullFilled(Span $span, array $options): callable
+    {
+        return function (ResponseInterface $response) use ($span, $options) {
             $span->setTag(
                 $this->spanTagManager->get('http_client', 'http.status_code'),
                 $response->getStatusCode()
             );
             $span->setTag('otel.status_code', 'OK');
+
+            $this->appendCustomResponseSpan($span, $options, $response);
         };
     }
 
-    private function onRejected(Span $span): callable
+    private function onRejected(Span $span, array $options): callable
     {
-        return function (RequestException $exception) use ($span) {
+        return function (RequestException $exception) use ($span, $options) {
             if ($this->switchManager->isEnabled('exception')) {
                 $this->appendExceptionToSpan($span, $exception);
             }
@@ -137,6 +151,8 @@ class HttpClientAspect implements AroundInterface
                 $this->spanTagManager->get('http_client', 'http.status_code'),
                 $exception->getResponse()->getStatusCode()
             );
+
+            $this->appendCustomResponseSpan($span, $options, $exception->getResponse());
 
             return Create::rejectionFor($exception);
         };
