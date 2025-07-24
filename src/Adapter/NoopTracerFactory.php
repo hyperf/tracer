@@ -15,7 +15,7 @@ use Hyperf\Tracer\Contract\NamedFactoryInterface;
 use OpenTracing\NoopTracer;
 use OpenTracing\Tracer;
 
-class NoopTracerFactory implements NamedFactoryInterface
+class NoOpTracerFactory implements NamedFactoryInterface
 {
     public function make(string $name): Tracer
     {
