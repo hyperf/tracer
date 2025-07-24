@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @contact  leo@opencodeco.dev
  * @license  https://github.com/opencodeco/hyperf-metric/blob/main/LICENSE
  */
+
 namespace Hyperf\Tracer;
 
 class SpanTagManager
@@ -18,6 +19,10 @@ class SpanTagManager
             'http.url' => 'http.url',
             'http.method' => 'http.method',
             'http.status_code' => 'http.status_code',
+        ],
+        'grpc' => [
+            'request.header' => 'grpc.request.header',
+            'response.header' => 'grpc.response.header',
         ],
         'redis' => [
             'arguments' => 'db.arguments',
@@ -40,6 +45,7 @@ class SpanTagManager
         ],
         'request' => [
             'path' => 'request.path',
+            'uri' => 'request.uri',
             'method' => 'request.method',
             'header' => 'request.header',
         ],

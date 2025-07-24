@@ -12,11 +12,14 @@ declare(strict_types=1);
 
 namespace Jaeger;
 
+use Hyperf\Context\ApplicationContext;
+use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\Coordinator\Constants;
 use Hyperf\Coordinator\CoordinatorManager;
 use Hyperf\Coroutine\Coroutine;
 use Hyperf\Engine\Channel;
 use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Socket;
 use Thrift\Exception\TTransportException;
 use Thrift\Transport\TTransport;
@@ -173,7 +176,7 @@ class ThriftUdpTransport extends TTransport
                         }
                         $closure->call($this);
                     } catch (Throwable $e) {
-                            $this->logger->error('ThriftUdpTransport error:' . $e->getMessage());
+                        $this->logger->error('ThriftUdpTransport error:' . $e->getMessage());
                         @socket_close($this->socket);
                         $this->socket = null;
                         break;

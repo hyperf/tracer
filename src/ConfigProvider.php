@@ -9,17 +9,24 @@ declare(strict_types=1);
  * @contact  leo@opencodeco.dev
  * @license  https://github.com/opencodeco/hyperf-metric/blob/main/LICENSE
  */
+
 namespace Hyperf\Tracer;
 
 use GuzzleHttp\Client;
+use Hyperf\Tracer\Aspect\CoroutineAspect;
+use Hyperf\Tracer\Aspect\CreateTraceContextAspect;
+use Hyperf\Tracer\Aspect\ElasticserachAspect;
+use Hyperf\Tracer\Aspect\GrpcAspect;
 use Hyperf\Tracer\Aspect\HttpClientAspect;
 use Hyperf\Tracer\Aspect\MongoCollectionAspect;
 use Hyperf\Tracer\Aspect\RedisAspect;
+use Hyperf\Tracer\Aspect\RpcAspect;
 use Hyperf\Tracer\Aspect\TraceAnnotationAspect;
 use Hyperf\Tracer\Listener\DbQueryExecutedListener;
 use Hyperf\Tracer\Middleware\TraceMiddleware;
 use Jaeger\SpanContext;
 use Jaeger\ThriftUdpTransport;
+use OpenTracing\GlobalTracer;
 use OpenTracing\Tracer;
 use Zipkin\Propagation\Map;
 use Jaeger\Codec\TextCodec;
@@ -44,6 +51,7 @@ class ConfigProvider
             'annotations' => [
                 'scan' => [
                     'class_map' => [
+                        GlobalTracer::class => __DIR__ . '/../class_map/GlobalTracer.php',
                         Map::class => __DIR__ . '/../class_map/Map.php',
                         ThriftUdpTransport::class => __DIR__ . '/../class_map/ThriftUdpTransport.php',
                         SpanContext::class => __DIR__ . '/../class_map/SpanContext.php',
@@ -52,8 +60,13 @@ class ConfigProvider
                 ],
             ],
             'aspects' => [
+                CoroutineAspect::class,
+                CreateTraceContextAspect::class,
+                ElasticserachAspect::class,
+                GrpcAspect::class,
                 HttpClientAspect::class,
                 RedisAspect::class,
+                RpcAspect::class,
                 TraceAnnotationAspect::class,
                 MongoCollectionAspect::class,
             ],
