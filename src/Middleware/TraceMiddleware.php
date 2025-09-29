@@ -156,8 +156,15 @@ class TraceMiddleware implements MiddlewareInterface
         return $span;
     }
 
-    protected function getPath(UriInterface $uri): string
+    protected function getPath(ServerRequestInterface $request): string
     {
-        return Uri::sanitize($uri->getPath());
+        $dispatched = $request->getAttribute(Dispatched::class);
+        if (! $dispatched) {
+            return Uri::sanitize($request->getUri()->getPath());
+        }
+        if (! $dispatched->handler) {
+            return 'not_found';
+        }
+        return $dispatched->handler->route;
     }
 }
